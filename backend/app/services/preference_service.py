@@ -28,6 +28,8 @@ def extract_budget(text: str) -> float | None:
         r"budget\s*(?:around|of)?\s*\$?(\d+)",
         r"\$?(\d+)\s*(?:budget|max|maximum)",
         r"around\s*\$?(\d+)",
+        r"for\s*\$?(\d+)",
+        r"\$?(\d+)",
     ]
 
     for pattern in patterns:

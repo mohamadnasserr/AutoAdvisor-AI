@@ -14,6 +14,21 @@ from backend.app.services.recommendation_service import (
 router = APIRouter(tags=["chat"])
 
 
+def build_listing_type_clarification(budget_max: float | None) -> str:
+    if budget_max is not None and budget_max <= 12000:
+        return (
+            "Do you prefer a used car, a new car, or are you open to both? "
+            f"With a budget around ${budget_max:,.0f}, used cars are usually the more realistic option, "
+            "but I can still compare both if you want."
+        )
+
+    return (
+        "Do you prefer a used car, a new car, or are you open to both? "
+        "This choice changes the recommendation because used cars are judged by mileage and condition, "
+        "while new cars are judged more by warranty, trim, and reference price."
+    )
+
+
 @router.post("/chat", response_model=ChatResponse)
 def chat(request: ChatRequest, db: Session = Depends(get_db)):
     intent = classify_intent(request.message)
@@ -21,9 +36,26 @@ def chat(request: ChatRequest, db: Session = Depends(get_db)):
 
     recommended_cars = []
 
-    if intent in ["car_recommendation", "price_check", "general_advice"]:
-        recommended_cars = recommend_cars(db=db, prefs=prefs)
-        answer = build_recommendation_answer(recommended_cars, prefs)
+    if intent == "car_recommendation":
+        if prefs.listing_type is None:
+            answer = build_listing_type_clarification(prefs.budget_max)
+        else:
+            recommended_cars = recommend_cars(db=db, prefs=prefs)
+            answer = build_recommendation_answer(recommended_cars, prefs)
+
+    elif intent == "price_check":
+        if prefs.listing_type is None:
+            answer = build_listing_type_clarification(prefs.budget_max)
+        else:
+            recommended_cars = recommend_cars(db=db, prefs=prefs)
+            answer = build_recommendation_answer(recommended_cars, prefs)
+
+    elif intent == "general_advice":
+        answer = (
+            "I can help with car recommendations, used-vs-new tradeoffs, comparisons, "
+            "price checks, image-assisted price estimation, and dealer inquiry drafts. "
+            "Tell me your budget, preferred listing type, and main use case."
+        )
 
     elif intent == "car_comparison":
         answer = (

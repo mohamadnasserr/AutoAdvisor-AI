@@ -87,3 +87,20 @@ def test_chat_routes_image_analysis_intent():
 
     assert data["intent"] == "image_analysis"
     assert "Image-assisted price estimation" in data["answer"]
+
+def test_chat_asks_clarification_when_listing_type_missing():
+    response = client.post(
+        "/chat",
+        json={"message": "I want a car for $10,000 in Lebanon"},
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["intent"] == "car_recommendation"
+    assert data["extracted_preferences"]["budget_max"] == 10000
+    assert data["extracted_preferences"]["listing_type"] is None
+    assert data["recommended_cars"] == []
+    assert "Do you prefer a used car, a new car, or are you open to both" in data["answer"]
+    assert "used cars are usually the more realistic option" in data["answer"]
