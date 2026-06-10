@@ -41,17 +41,43 @@ def extract_budget(text: str) -> float | None:
 def extract_listing_type(text: str) -> str | None:
     lowered = text.lower()
 
-    if "new car" in lowered or "brand new" in lowered or "zero mileage" in lowered:
-        return "new"
+    both_patterns = [
+        "new or used",
+        "used or new",
+        "new and used",
+        "used and new",
+        "open to new or used",
+        "open to used or new",
+        "either new or used",
+        "either used or new",
+    ]
 
-    if "used car" in lowered or "second hand" in lowered or "pre owned" in lowered or "pre-owned" in lowered:
-        return "used"
-
-    if "new or used" in lowered or "used or new" in lowered:
+    if any(pattern in lowered for pattern in both_patterns):
         return "both"
 
-    return None
+    new_patterns = [
+        "new car",
+        "brand new",
+        "zero mileage",
+        "0 mileage",
+        "new vehicle",
+    ]
 
+    if any(pattern in lowered for pattern in new_patterns):
+        return "new"
+
+    used_patterns = [
+        "used",
+        "second hand",
+        "second-hand",
+        "pre owned",
+        "pre-owned",
+    ]
+
+    if any(pattern in lowered for pattern in used_patterns):
+        return "used"
+
+    return None
 
 def extract_preferences(message: str) -> PreferenceExtraction:
     text = message.lower()
