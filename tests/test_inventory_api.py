@@ -103,3 +103,22 @@ def test_search_cars_supports_nullable_mileage_for_new_cars():
     for car in data["results"]:
         assert "mileage_km" in car
         assert "warranty_years" in car
+
+def test_get_new_car_includes_warranty_and_zero_mileage():
+    response = client.get(
+        "/search/cars",
+        params={"listing_type": "new"},
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+    assert data["count"] >= 1
+
+    first_new_car = data["results"][0]
+
+    assert first_new_car["listing_type"] == "new"
+    assert first_new_car["is_new"] is True
+    assert first_new_car["mileage_km"] == 0
+    assert first_new_car["condition"] == "New"
+    assert first_new_car["warranty_years"] is not None

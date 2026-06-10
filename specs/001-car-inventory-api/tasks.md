@@ -19,10 +19,10 @@
 - [x] Fix and test seed-script repeat-run/idempotency behavior.
 - [x] Verify repeat seeding skips existing cars instead of duplicating them.
 - [x] Add inventory/search API tests in `tests/test_inventory_api.py`.
+- [x] Verify nullable mileage and warranty fields across every API path.
 
 ## Missing or Needs Verification
 
-- [ ] Verify nullable mileage and warranty fields across every API path.
 - [ ] Update stale SQLite/ChromaDB documentation and remove or clarify the
   unused SQLite helper in `backend/app/database.py`.
 - [ ] Decide whether to add `/cars/search` as an alias or keep only the working
@@ -30,6 +30,6 @@
 
 ## Verification
 
-- `python -m pytest tests\test_inventory_api.py` -> 7 passed.
+- `python -m pytest tests\test_inventory_api.py` -> 8 passed.
 - Non-blocking warnings: FastAPI `on_event` deprecation warning and
   Starlette/httpx TestClient warning.
