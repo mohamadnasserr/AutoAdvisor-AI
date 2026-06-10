@@ -1,0 +1,51 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Environment/secrets
+.env
+.env.*
+!.env.example
+
+# IDE/editor
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Local uploads and generated files
+uploads/
+data/raw/
+data/processed/
+models/
+vectorstore/
+chroma_db/
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Docker/local artifacts
+docker-compose.override.yml
+
+# Streamlit
+.streamlit/secrets.toml

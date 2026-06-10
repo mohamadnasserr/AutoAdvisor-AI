@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: autoadvisor_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: autoadvisor
+      POSTGRES_PASSWORD: autoadvisor123
+      POSTGRES_DB: autoadvisor_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - autoadvisor_pgdata:/var/lib/postgresql/data
+
+volumes:
+  autoadvisor_pgdata:

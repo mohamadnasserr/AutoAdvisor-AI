@@ -1,0 +1,17 @@
+listing_type,is_new,make,model,trim,year,price_usd,mileage_km,body_type,fuel,transmission,color,condition,warranty_years,region,dealer_name
+used,false,Toyota,Corolla,Base,2018,10500,90000,Sedan,Petrol,Automatic,White,Good,,Beirut,Beirut Auto
+used,false,Kia,Picanto,EX,2019,8200,70000,Hatchback,Petrol,Automatic,Silver,Good,,Jounieh,Cedar Motors
+used,false,Honda,Civic,LX,2017,11500,110000,Sedan,Petrol,Automatic,Black,Good,,Beirut,Beirut Auto
+used,false,Hyundai,Tucson,GLS,2018,16000,95000,SUV,Petrol,Automatic,Grey,Good,,Zahle,Auto House
+used,false,BMW,320i,Base,2016,14500,120000,Sedan,Petrol,Automatic,Black,Fair,,Beirut,Premium Cars
+used,false,Mercedes-Benz,C200,Base,2015,15000,130000,Sedan,Petrol,Automatic,White,Fair,,Beirut,Premium Cars
+used,false,Toyota,Yaris,Base,2020,9800,60000,Hatchback,Petrol,Automatic,Red,Good,,Tripoli,North Motors
+used,false,Nissan,Sunny,SV,2019,9000,85000,Sedan,Petrol,Automatic,Silver,Good,,Saida,South Auto
+used,false,Kia,Sportage,EX,2017,15500,105000,SUV,Petrol,Automatic,Blue,Good,,Jounieh,Cedar Motors
+used,false,Hyundai,Elantra,GL,2018,9800,95000,Sedan,Petrol,Automatic,White,Good,,Zahle,Auto House
+new,true,Kia,Picanto,Base,2024,16500,0,Hatchback,Petrol,Automatic,White,New,3,Beirut,Cedar Motors
+new,true,Hyundai,Grand i10,Base,2024,15500,0,Hatchback,Petrol,Automatic,Silver,New,3,Beirut,Auto House
+new,true,Toyota,Corolla,Hybrid,2024,28500,0,Sedan,Hybrid,Automatic,White,New,3,Beirut,Beirut Auto
+new,true,Nissan,Sunny,SV,2024,18500,0,Sedan,Petrol,Automatic,Grey,New,3,Saida,South Auto
+new,true,Hyundai,Tucson,GLS,2024,33500,0,SUV,Petrol,Automatic,Black,New,3,Zahle,Auto House
+new,true,Kia,Sportage,EX,2024,34500,0,SUV,Petrol,Automatic,White,New,3,Jounieh,Cedar Motors
