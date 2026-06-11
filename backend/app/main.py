@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from backend.app.api.car_routes import router as car_router
 from backend.app.api.chat_routes import router as chat_router
 from backend.app.config import settings
+from backend.app.api.price_routes import router as price_router
 from backend.app.db.init_db import init_db
 from backend.app.models.schemas import HealthResponse
 from backend.app.api.comparison_routes import router as comparison_router
@@ -31,3 +32,4 @@ def health():
 app.include_router(chat_router)
 app.include_router(car_router)
 app.include_router(comparison_router)
+app.include_router(price_router)
