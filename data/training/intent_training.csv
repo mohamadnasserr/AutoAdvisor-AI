@@ -1,0 +1,121 @@
+text,intent
+I need a reliable used car under 10000,car_recommendation
+I want a city car for Beirut traffic,car_recommendation
+Find me a family SUV around 18000,car_recommendation
+Looking for a cheap first car,car_recommendation
+I want a brand new small car,car_recommendation
+Recommend a fuel efficient hatchback,car_recommendation
+I need a used Toyota Corolla,car_recommendation
+Show me cars under 15000,car_recommendation
+I want a car with low maintenance,car_recommendation
+Find a new or used car for my budget,car_recommendation
+Compare Corolla and Civic,car_comparison
+Compare Toyota Yaris vs Kia Picanto,car_comparison
+Which is better Civic or Elantra,car_comparison
+Compare these three cars,car_comparison
+Compare the top 3 options,car_comparison
+Difference between Corolla and Sunny,car_comparison
+Compare SUV options for family use,car_comparison
+Which car is better for me,car_comparison
+Compare BMW and Mercedes maintenance,car_comparison
+Compare new and used options,car_comparison
+Is this price fair,price_check
+Is this car overpriced,price_check
+How much should this used car cost,price_check
+Estimate the price of this car,price_check
+What is a fair price for Corolla 2018,price_check
+Can you check if 12000 is too expensive,price_check
+Is this listing worth it,price_check
+Price check this car,price_check
+How much is this car worth,price_check
+Can you value this used car,price_check
+I want to upload a car image,image_analysis
+Analyze this car photo,image_analysis
+Check this vehicle picture,image_analysis
+Can you detect the car from an image,image_analysis
+Upload image and estimate price,image_analysis
+I have photos of the car,image_analysis
+Check if this image is clear,image_analysis
+Detect the color from this car picture,image_analysis
+Can you inspect this uploaded car image,image_analysis
+I want image assisted price estimation,image_analysis
+Connect me with a dealer,dealer_contact
+Contact the dealership,dealer_contact
+I want to message the dealer,dealer_contact
+Generate dealer inquiry,dealer_contact
+Can you call the dealer,dealer_contact
+Prepare a message for the seller,dealer_contact
+I like this car connect me,dealer_contact
+Send inquiry to dealership,dealer_contact
+Dealer contact for this Corolla,dealer_contact
+I want dealership information,dealer_contact
+What should I check before buying a used car,general_advice
+Give me buying tips,general_advice
+How do I inspect a used car,general_advice
+What documents should I verify,general_advice
+Tell me about maintenance risks,general_advice
+Should I buy new or used,general_advice
+Explain car depreciation,general_advice
+What makes a car reliable,general_advice
+What are common used car red flags,general_advice
+How to avoid bad used cars,general_advice
+Recommend me a new SUV with a warranty,car_recommendation
+Need a decent second hand sedan below 12k,car_recommendation
+what car should i get for daily commuting,car_recommendation
+Find me an automatic car for a family of five,car_recommendation
+show affordable hybrid cars in Lebanon,car_recommendation
+I need a zero mileage car under 20000,car_recommendation
+Any good used hatchbacks with low mileage,car_recommendation
+help me pick a reliable car for university,car_recommendation
+looking for somthing fuel efficient and easy to park,car_recommendation
+Recommend cars from Toyota or Honda around 15000,car_recommendation
+Corolla vs Civic which one should I buy,car_comparison
+compare a new Picanto with a used Yaris,car_comparison
+Which is better Tucson Sportage or RAV4,car_comparison
+Show me the top 3 family SUVs side by side,car_comparison
+compare these car ids for me,car_comparison
+Can you compare 2018 Corolla and 2024 Corolla,car_comparison
+BMW 320i vs Mercedes C200 for maintenance and price,car_comparison
+Compare the price mileage and warranty of these options,car_comparison
+which of these four cars is best for city driving,car_comparison
+I want a multi car comparison for Corolla Civic and Elantra,car_comparison
+is this worth it at 9500,price_check
+What is the fair value of this used Civic,price_check
+Does this asking price look overpriced,price_check
+Seller wants 14k is that reasonable,price_check
+Tell me the market value for a 2019 Picanto,price_check
+am i paying too much for this car,price_check
+What price range should I expect for this used SUV,price_check
+Check whether this deal is good value,price_check
+How much would you offer for this listing,price_check
+Is the new car price fair compared with similar listings,price_check
+Use this photo to help estimate the used car price,image_analysis
+Can an image help identify this car before valuation,image_analysis
+check the photo quality before estimating anything,image_analysis
+What body type and color do you see in this image,image_analysis
+is there actually a vehicle in this uploaded pic,image_analysis
+Analyze these car pics and suggest make and model,image_analysis
+image assisted used car price check please,image_analysis
+This photo is kinda blurry can you still analyze it,image_analysis
+Run the safety check on my uploaded vehicle photo,image_analysis
+Extract car details from the image then let me confirm them,image_analysis
+How can I reach the seller,dealer_contact
+Draft an inquiry for this vehicle,dealer_contact
+Show me the dealership phone number,dealer_contact
+I want to ask the seller if the car is still available,dealer_contact
+please prepare a dealer message but dont send it yet,dealer_contact
+Can you connect me to whoever listed this car,dealer_contact
+Create an inquiry for the Toyota option,dealer_contact
+where is this dealer located,dealer_contact
+Help me contact the showroom,dealer_contact
+I confirmed the car now store my dealer inquiry,dealer_contact
+How do I check a car for accident history,general_advice
+What maintenance should I expect after buying,general_advice
+Which papers prove ownership in Lebanon,general_advice
+How fast do new cars depreciate,general_advice
+Is a new car or used car smarter for my budget,general_advice
+What makes Toyota reliable compared with other brands,general_advice
+What should a mechanic inspect before I buy,general_advice
+How can I spot flood or crash damage,general_advice
+Explain service history and why it matters,general_advice
+Any advice for checking mileage tampering,general_advice
