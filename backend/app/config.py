@@ -14,6 +14,10 @@ class Settings(BaseSettings):
     openai_api_key: str | None = None
     gemini_api_key: str | None = None
 
+    redis_url: str = "redis://localhost:6379/0"
+    chat_memory_ttl_seconds: int = 1800
+    chat_memory_max_messages: int = 30
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

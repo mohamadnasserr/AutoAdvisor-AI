@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from backend.app.db.database import get_db
+from backend.app.services.chat_memory_service import ChatMemoryService
 from backend.app.models.schemas import ChatRequest, ChatResponse
 from backend.app.services.comparison_service import (
     build_comparison_chat_answer,
@@ -18,6 +19,7 @@ from backend.app.services.recommendation_service import (
 
 router = APIRouter(tags=["chat"])
 
+memory_service = ChatMemoryService()
 
 def build_listing_type_clarification(budget_max: float | None) -> str:
     if budget_max is not None and budget_max <= 12000:
@@ -38,7 +40,12 @@ def build_listing_type_clarification(budget_max: float | None) -> str:
 def chat(request: ChatRequest, db: Session = Depends(get_db)):
     intent = classify_intent(request.message)
     prefs = extract_preferences(request.message)
-
+    session_id = request.session_id or "default"
+    memory_service.add_message(
+        session_id=session_id,
+        role="user",
+        content=request.message,
+    )
     recommended_cars = []
 
     if intent == "car_recommendation":
@@ -102,7 +109,15 @@ def chat(request: ChatRequest, db: Session = Depends(get_db)):
     else:
         answer = "I can help with car recommendations, comparisons, price checks, image analysis, and dealer inquiries."
 
+    memory_service.add_message(
+
+        session_id=session_id,
+        role="assistant",
+        content=answer,
+    )
+
     return ChatResponse(
+        session_id=session_id,
         intent=intent,
         extracted_preferences=prefs,
         answer=answer,
