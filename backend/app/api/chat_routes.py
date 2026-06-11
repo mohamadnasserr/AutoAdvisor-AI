@@ -2,6 +2,8 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from backend.app.db.database import get_db
+from backend.app.services.price_check_service import extract_price_check_request
+from backend.app.services.price_estimator_service import price_estimator
 from backend.app.services.chat_memory_service import ChatMemoryService
 from backend.app.models.schemas import ChatRequest, ChatResponse
 from backend.app.services.comparison_service import (
@@ -56,11 +58,45 @@ def chat(request: ChatRequest, db: Session = Depends(get_db)):
             answer = build_recommendation_answer(recommended_cars, prefs)
 
     elif intent == "price_check":
-        if prefs.listing_type is None:
-            answer = build_listing_type_clarification(prefs.budget_max)
+
+        extracted_price_check = extract_price_check_request(request.message)
+
+        if extracted_price_check.request is None:
+            missing = ", ".join(extracted_price_check.missing_fields)
+            answer = (
+                "I can estimate the fair used-car price, but I need a few details first. "
+                f"Missing fields: {missing}. "
+                "Please send something like: "
+                "'2018 Hyundai i20, 60000 km, petrol, manual, asking $8500'."
+            )
+        elif not price_estimator.is_available():
+            answer = "The used-car price estimator model is currently unavailable."
         else:
-            recommended_cars = recommend_cars(db=db, prefs=prefs)
-            answer = build_recommendation_answer(recommended_cars, prefs)
+            prediction = price_estimator.predict(extracted_price_check.request)
+
+            asking_price = extracted_price_check.asking_price_usd
+            if asking_price is None:
+                asking_price_text = "You did not provide an asking price, so I can only provide a fair range."
+                verdict = "Compare the seller's asking price against this range before negotiating."
+            elif asking_price < prediction.low_estimate_usd:
+                asking_price_text = f"Asking price: ${asking_price:,.0f}."
+                verdict = "This looks below the estimated fair range. Verify condition, accident history, papers, and hidden issues."
+            elif asking_price > prediction.high_estimate_usd:
+                asking_price_text = f"Asking price: ${asking_price:,.0f}."
+                verdict = "This looks overpriced versus the estimated fair range. Negotiate or compare with similar listings."
+            else:
+                asking_price_text = f"Asking price: ${asking_price:,.0f}."
+                verdict = "This asking price falls inside the estimated fair range."
+
+            answer = (
+                "Used-car fair price estimate:\n"
+                f"- Estimated price: ${prediction.estimated_price_usd:,.0f}\n"
+                f"- Fair range: ${prediction.low_estimate_usd:,.0f}–${prediction.high_estimate_usd:,.0f}\n"
+                f"- {asking_price_text}\n"
+                f"- Verdict: {verdict}\n\n"
+                f"Model info: MAE ≈ ${prediction.model_mae_usd:,.0f}, R² ≈ {prediction.model_r2}.\n"
+                f"Note: {prediction.disclaimer}"
+            )
 
     elif intent == "general_advice":
         answer = (

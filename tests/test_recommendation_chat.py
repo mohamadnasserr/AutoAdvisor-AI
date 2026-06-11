@@ -124,3 +124,41 @@ def test_chat_asks_clarification_when_listing_type_missing():
     assert data["recommended_cars"] == []
     assert "Do you prefer a used car, a new car, or are you open to both" in data["answer"]
     assert "used cars are usually the more realistic option" in data["answer"]
+
+
+
+def test_chat_price_check_returns_fair_price_range():
+    payload = {
+        "message": "Is a 2018 Hyundai i20 with 60000 km petrol manual asking $8500 overpriced?",
+        "session_id": "price-check-test",
+    }
+
+    response = client.post("/chat", json=payload)
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["intent"] == "price_check"
+    assert "Used-car fair price estimate" in data["answer"]
+    assert "Fair range" in data["answer"]
+    assert "Verdict" in data["answer"]
+    assert "$8,500" in data["answer"]
+
+
+def test_chat_price_check_asks_for_missing_fields():
+    payload = {
+        "message": "Is this car overpriced?",
+        "session_id": "price-check-missing-fields-test",
+    }
+
+    response = client.post("/chat", json=payload)
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["intent"] == "price_check"
+    assert "Missing fields" in data["answer"]
+    assert "brand" in data["answer"]
+    assert "model" in data["answer"]
