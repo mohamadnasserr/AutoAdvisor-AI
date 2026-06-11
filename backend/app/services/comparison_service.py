@@ -174,3 +174,79 @@ def compare_cars_by_ids(db: Session, car_ids: list[int]) -> tuple[list[CarCompar
     )
 
     return comparison_items, final_verdict, best_item.id
+
+
+def find_cars_for_comparison_message(db: Session, message: str, max_cars: int = 5) -> list[Car]:
+    text = message.lower()
+
+    query = db.query(Car)
+
+    if any(phrase in text for phrase in ["brand new", "new car", "zero mileage"]):
+        query = query.filter(Car.listing_type == "new")
+    elif any(phrase in text for phrase in ["used", "second hand", "second-hand", "pre-owned", "pre owned"]):
+        query = query.filter(Car.listing_type == "used")
+
+    cars = query.order_by(Car.price_usd.asc()).all()
+
+    matched: list[Car] = []
+    seen_models: set[str] = set()
+
+    for car in cars:
+        make = car.make.lower()
+        model = car.model.lower()
+        full_name = f"{make} {model}"
+        model_key = f"{make}:{model}"
+
+        if model_key in seen_models:
+            continue
+
+        # Prefer model/full-name matching. Make-only matching is too broad.
+        if model in text or full_name in text:
+            matched.append(car)
+            seen_models.add(model_key)
+
+        if len(matched) >= max_cars:
+            break
+
+    return matched
+
+
+def build_comparison_chat_answer(
+    comparison_items: list[CarComparisonItem],
+    final_verdict: str,
+) -> str:
+    if not comparison_items:
+        return (
+            "I could not find enough cars to compare. "
+            "Please mention 2 to 5 car models, for example: Compare Corolla, Civic, and Elantra."
+        )
+
+    lines = [
+        "Here is a structured comparison of the selected cars:",
+        "",
+    ]
+
+    for index, car in enumerate(comparison_items, start=1):
+        mileage_text = "0 km" if car.is_new else (
+            f"{car.mileage_km:,} km" if car.mileage_km is not None else "mileage not listed"
+        )
+
+        warranty_text = ""
+        if car.is_new and car.warranty_years:
+            warranty_text = f", warranty: {car.warranty_years:g} years"
+
+        lines.append(
+            f"{index}. {car.title} ({car.listing_type}) — "
+            f"${car.price_usd:,.0f}, {mileage_text}, {car.body_type}, "
+            f"{car.fuel}, {car.transmission}{warranty_text}."
+        )
+
+        lines.append(f"   Best use case: {car.best_use_case}")
+        lines.append(f"   Strengths: {', '.join(car.strengths)}")
+        lines.append(f"   Risks: {', '.join(car.risks)}")
+        lines.append(f"   Score: {car.verdict_score:.1f}")
+        lines.append("")
+
+    lines.append(final_verdict)
+
+    return "\n".join(lines)

@@ -3,6 +3,11 @@ from sqlalchemy.orm import Session
 
 from backend.app.db.database import get_db
 from backend.app.models.schemas import ChatRequest, ChatResponse
+from backend.app.services.comparison_service import (
+    build_comparison_chat_answer,
+    compare_cars_by_ids,
+    find_cars_for_comparison_message,
+)
 from backend.app.services.intent_service import classify_intent
 from backend.app.services.preference_service import extract_preferences
 from backend.app.services.recommendation_service import (
@@ -58,10 +63,28 @@ def chat(request: ChatRequest, db: Session = Depends(get_db)):
         )
 
     elif intent == "car_comparison":
-        answer = (
-            "Comparison workflow is coming next. For the MVP, I will compare cars using "
-            "price, mileage, reliability, maintenance risk, warranty, and RAG-backed buying advice."
+        cars_to_compare = find_cars_for_comparison_message(
+            db=db,
+            message=request.message,
         )
+
+        if len(cars_to_compare) < 2:
+            answer = (
+                "I need at least 2 cars to compare. "
+                "Please mention 2 to 5 models, for example: "
+                "Compare Toyota Corolla, Honda Civic, and Hyundai Elantra."
+            )
+        else:
+            car_ids = [car.id for car in cars_to_compare[:5]]
+            comparison_items, final_verdict, _ = compare_cars_by_ids(
+                db=db,
+                car_ids=car_ids,
+            )
+            answer = build_comparison_chat_answer(
+                comparison_items=comparison_items,
+                final_verdict=final_verdict,
+            )
+            recommended_cars = cars_to_compare[:5]
 
     elif intent == "dealer_contact":
         answer = (

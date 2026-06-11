@@ -27,23 +27,26 @@ def test_chat_recommends_used_city_car_under_budget():
         assert car["price_usd"] <= 11500
 
 
-def test_chat_can_recommend_new_car_option():
+def test_chat_comparison_requires_at_least_two_inventory_models():
+    cars_response = client.get("/cars")
+    cars_data = cars_response.json()
+
+    first_car = cars_data["results"][0]
+
+    message = f"Compare {first_car['make']} {first_car['model']}"
+
     response = client.post(
         "/chat",
-        json={"message": "I want a brand new small city car in Lebanon"},
+        json={"message": message},
     )
 
     assert response.status_code == 200
 
     data = response.json()
 
-    assert data["intent"] == "car_recommendation"
-    assert data["extracted_preferences"]["listing_type"] == "new"
-    assert len(data["recommended_cars"]) >= 1
-
-    for car in data["recommended_cars"]:
-        assert car["listing_type"] == "new"
-        assert car["is_new"] is True
+    assert data["intent"] == "car_comparison"
+    assert data["recommended_cars"] == []
+    assert "I need at least 2 cars to compare" in data["answer"]
 
 
 def test_chat_handles_new_or_used_request():
@@ -61,10 +64,21 @@ def test_chat_handles_new_or_used_request():
     assert len(data["recommended_cars"]) >= 1
 
 
-def test_chat_routes_comparison_intent():
+def test_chat_routes_comparison_intent_with_existing_inventory_models():
+    cars_response = client.get("/cars")
+    cars_data = cars_response.json()
+
+    first_car = cars_data["results"][0]
+    second_car = cars_data["results"][1]
+
+    message = (
+        f"Compare {first_car['make']} {first_car['model']} "
+        f"and {second_car['make']} {second_car['model']}"
+    )
+
     response = client.post(
         "/chat",
-        json={"message": "Compare Toyota Corolla and Honda Civic for a first car"},
+        json={"message": message},
     )
 
     assert response.status_code == 200
@@ -72,7 +86,13 @@ def test_chat_routes_comparison_intent():
     data = response.json()
 
     assert data["intent"] == "car_comparison"
-    assert "Comparison workflow" in data["answer"]
+    assert "Here is a structured comparison" in data["answer"]
+    assert len(data["recommended_cars"]) == 2
+
+    returned_ids = {car["id"] for car in data["recommended_cars"]}
+    expected_ids = {first_car["id"], second_car["id"]}
+
+    assert returned_ids == expected_ids
 
 
 def test_chat_routes_image_analysis_intent():
