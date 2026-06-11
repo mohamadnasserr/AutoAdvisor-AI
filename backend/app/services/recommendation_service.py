@@ -104,51 +104,97 @@ def recommend_cars(db: Session, prefs: PreferenceExtraction, limit: int = 5) -> 
 def build_recommendation_answer(cars: list[Car], prefs: PreferenceExtraction) -> str:
     if not cars:
         return (
-            "I could not find a strong match in the demo inventory. "
-            "Try increasing the budget or relaxing the brand/body-type preference."
+            "I could not find a strong match in the current demo inventory. "
+            "Try increasing the budget, allowing both new and used cars, or relaxing the brand/body-type preference."
         )
 
-    lines = [
-        "Here are the best matches from the Lebanon/MENA demo inventory:",
-        "",
-    ]
+    lines: list[str] = []
+
+    if prefs.listing_type == "used":
+        lines.append(
+            "Based on your request, I focused on used cars. "
+            "This usually gives you better value for the budget, but the tradeoff is that mileage, condition, "
+            "service history, and accident history matter a lot."
+        )
+    elif prefs.listing_type == "new":
+        lines.append(
+            "Based on your request, I focused on new cars. "
+            "These usually cost more, but they offer zero mileage, warranty coverage, and lower short-term maintenance risk."
+        )
+    elif prefs.listing_type == "both":
+        lines.append(
+            "I compared both new and used options. "
+            "Used cars may give stronger value, while new cars offer warranty and zero-mileage peace of mind."
+        )
+    else:
+        lines.append(
+            "Here are the strongest matches I found from the current demo inventory."
+        )
+
+    if prefs.budget_max:
+        lines.append(f"Budget target: around ${prefs.budget_max:,.0f}.")
+
+    if prefs.use_case:
+        lines.append(f"Main use case detected: {prefs.use_case}.")
+
+    if prefs.priorities:
+        lines.append(f"Priorities detected: {', '.join(prefs.priorities)}.")
+
+    lines.append("")
+    lines.append("Top matches:")
 
     for index, car in enumerate(cars, start=1):
         reason_parts = []
 
         if prefs.budget_max and car.price_usd <= prefs.budget_max:
-            reason_parts.append("within budget")
+            reason_parts.append("fits your budget")
+        elif prefs.budget_max and car.price_usd <= prefs.budget_max * 1.15:
+            reason_parts.append("slightly above budget but close enough to consider")
 
         if car.make in RELIABLE_BRANDS:
-            reason_parts.append("reliable brand reputation")
+            reason_parts.append("strong reliability reputation")
 
-        if prefs.use_case == "city" and car.body_type in ["Sedan", "Hatchback"]:
-            reason_parts.append("good body type for city driving")
+        if prefs.use_case == "city" and car.body_type in ["Hatchback", "Sedan"]:
+            reason_parts.append("practical size for city driving")
 
         if prefs.use_case == "family" and car.body_type == "SUV":
-            reason_parts.append("practical family option")
+            reason_parts.append("better space for family use")
 
         if car.is_new:
-            reason_parts.append("new car with zero mileage")
+            reason_parts.append("zero mileage")
             if car.warranty_years:
                 reason_parts.append(f"{car.warranty_years:g}-year warranty")
         else:
-            reason_parts.append("used-car option with lower entry price")
+            if car.mileage_km is not None:
+                if car.mileage_km <= 80000:
+                    reason_parts.append("relatively low mileage")
+                elif car.mileage_km <= 120000:
+                    reason_parts.append("acceptable mileage range")
+                else:
+                    reason_parts.append("higher mileage, needs careful inspection")
+            reason_parts.append("lower entry price than a new equivalent")
 
-        reason = ", ".join(reason_parts)
+        reason = ", ".join(reason_parts) if reason_parts else "reasonable match for your request"
 
-        mileage_text = "0 km" if car.is_new else f"{car.mileage_km:,} km"
+        mileage_text = "0 km" if car.is_new else (
+            f"{car.mileage_km:,} km" if car.mileage_km is not None else "mileage not listed"
+        )
+
+        warranty_text = ""
+        if car.is_new and car.warranty_years:
+            warranty_text = f", warranty: {car.warranty_years:g} years"
 
         lines.append(
-            f"{index}. {car.year} {car.make} {car.model} "
-            f"({car.listing_type}) — ${car.price_usd:,.0f}, "
-            f"{mileage_text}, {car.body_type}. Reason: {reason}."
+            f"{index}. {car.year} {car.make} {car.model} ({car.listing_type}) — "
+            f"${car.price_usd:,.0f}, {mileage_text}, {car.body_type}, "
+            f"{car.fuel}, {car.transmission}{warranty_text}. "
+            f"Why it fits: {reason}."
         )
 
     lines.append("")
     lines.append(
-        "Note: used-car prices are demo estimates and should be verified with inspection, "
-        "service history, ownership papers, accident history, and real market availability."
+        "My advice: shortlist 2–3 cars from these results, compare them side by side, "
+        "and for any used car, verify the service history, accident history, ownership papers, and mileage before buying."
     )
 
     return "\n".join(lines)
