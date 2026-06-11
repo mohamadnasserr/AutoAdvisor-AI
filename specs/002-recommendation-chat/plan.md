@@ -14,7 +14,13 @@ fit scoring -> text answer + Pydantic car responses.
 4. Improve response formatting with consistent recommendation reasons and
    explicit tradeoffs.
 5. Make all formatting null-safe.
-6. Add optional RAG context only after the non-RAG workflow is stable.
+6. Add comparison request and response Pydantic schemas for 2 to 5 cars.
+7. Add a rule-based comparison service using structured PostgreSQL inventory.
+8. Add `POST /compare` and route `/chat` comparison intent to the comparison
+   workflow.
+9. Allow a later frontend to compare selected recommended inventory cars.
+10. Add optional RAG context only after the non-RAG recommendation and
+    comparison workflows are stable.
 
 ## Validation Scenarios
 
@@ -24,6 +30,10 @@ fit scoring -> text answer + Pydantic car responses.
 - Luxury preference with low-maintenance concern.
 - No-match request.
 - Missing mileage or warranty data.
+- Compare 2 cars.
+- Compare 3 to 5 cars.
+- Reject a comparison of more than 5 cars.
+- Request another car or broader filters when fewer than 2 cars are available.
 
 ## Non-Goals for This Spec
 

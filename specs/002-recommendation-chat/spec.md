@@ -30,6 +30,28 @@ seeded new/used inventory, ranks suitable cars, and explains the tradeoffs.
 - Clearly label demo inventory and avoid unsupported availability claims.
 - Add source-backed RAG later; do not fabricate sources now.
 
+## Car Comparison
+
+- The chatbot must support comparing 2 to 5 cars.
+- Cars may come from:
+  - Retrieved or recommended cars from the current chat result.
+  - An explicit request such as "compare Corolla, Civic, and Elantra".
+  - Selected inventory car IDs from a future frontend workflow.
+- The first MVP comparison must use structured inventory cars from PostgreSQL.
+- Each comparison must include:
+  - Make, model, and year.
+  - Listing type: new or used.
+  - Price and mileage.
+  - Body type, fuel, and transmission.
+  - Condition.
+  - Warranty years when applicable to a new car.
+  - Strengths, risks, best use case, and a final recommendation/verdict.
+- If a user requests more than 5 cars, ask them to narrow the comparison.
+- If fewer than 2 cars are available, ask for another car or suggest broader
+  inventory filters.
+- Comparison should be rule-based first. Source-backed RAG explanations may be
+  added later.
+
 ## Response Quality
 
 Each recommendation should make relevant tradeoffs clear, such as budget fit,
@@ -44,4 +66,7 @@ response must tolerate null mileage/warranty values and should avoid empty
 - Mixed recommendations explain why a new or used option fits.
 - No-match responses suggest useful constraint changes.
 - Null fields do not crash answer formatting.
+- Comparison responses support 2 to 5 cars and include strengths, risks, best
+  use cases, and a final verdict.
+- Invalid comparison sizes receive actionable guidance.
 - Tests cover intent routing, extraction, ranking, and `/chat`.

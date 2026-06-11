@@ -21,5 +21,15 @@
   explicitly requested.
 - [ ] Make recommendation formatting safe for nullable used-car mileage.
 - [ ] Implement real comparison behavior.
+- [ ] Define comparison request and response schemas.
+- [ ] Implement comparison service for 2 to 5 cars.
+- [ ] Add `POST /compare` endpoint.
+- [ ] Add chat handling for comparison intent.
+- [ ] Add tests for comparing 2 cars.
+- [ ] Add tests for comparing 3 to 5 cars.
+- [ ] Add test for rejecting more than 5 cars.
+- [ ] Add test for fewer than 2 cars.
+- [ ] Add comparison output with strengths, risks, best use case, and final
+  verdict.
 - [ ] Add optional source-backed RAG after the base workflow is stable.
 - [ ] Add recommendation evaluation scenarios and rubric.
