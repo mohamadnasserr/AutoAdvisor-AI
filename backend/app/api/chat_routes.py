@@ -18,6 +18,7 @@ from backend.app.services.recommendation_service import (
     recommend_cars,
 )
 
+from backend.app.services.rag_service import build_rag_answer, retrieve_rag_sources
 
 router = APIRouter(tags=["chat"])
 
@@ -99,11 +100,8 @@ def chat(request: ChatRequest, db: Session = Depends(get_db)):
             )
 
     elif intent == "general_advice":
-        answer = (
-            "I can help with car recommendations, used-vs-new tradeoffs, comparisons, "
-            "price checks, image-assisted price estimation, and dealer inquiry drafts. "
-            "Tell me your budget, preferred listing type, and main use case."
-        )
+        rag_sources = retrieve_rag_sources(db, request.message, limit=3)
+        answer = build_rag_answer(request.message, rag_sources)
 
     elif intent == "car_comparison":
         cars_to_compare = find_cars_for_comparison_message(

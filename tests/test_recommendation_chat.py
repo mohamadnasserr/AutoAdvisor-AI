@@ -162,3 +162,20 @@ def test_chat_price_check_asks_for_missing_fields():
     assert "Missing fields" in data["answer"]
     assert "brand" in data["answer"]
     assert "model" in data["answer"]
+
+def test_chat_general_advice_uses_rag_sources():
+    payload = {
+        "message": "What should I check before buying a used car?",
+        "session_id": "rag-general-advice-test",
+    }
+
+    response = client.post("/chat", json=payload)
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["intent"] == "general_advice"
+    assert "Based on the AutoAdvisor knowledge base" in data["answer"]
+    assert "Sources:" in data["answer"]
+    assert "local://rag_docs/" in data["answer"]

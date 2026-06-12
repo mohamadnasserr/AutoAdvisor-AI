@@ -14,6 +14,15 @@
   currency, and disclaimer.
 - [x] Add tests for successful price prediction.
 - [x] Add tests for required-field validation.
+- [x] Add price-check extraction service for chat messages.
+- [x] Extract brand, model, year, km driven, fuel type, transmission type, and
+  asking price from user messages.
+- [x] Connect `/chat` `price_check` intent to the used-car price estimator.
+- [x] Return fair price range and overpriced/fair/below-range verdict in chat.
+- [x] Add missing-fields fallback when the user does not provide enough car
+  details.
+- [x] Add chat tests for successful price-check estimate.
+- [x] Add chat tests for missing price-check fields.
 - [ ] Define preprocessing and leakage controls.
 - [ ] Report deeper failure examples and segment-level model performance.
 - [ ] Calibrate the public non-local dataset for Lebanon/MENA market pricing.
@@ -30,4 +39,5 @@
 - Training rows used: 15,411.
 - Training result: MAE around $1,206.86, R2 around 0.932.
 - `python -m pytest tests\test_price_estimator.py` -> 2 passed.
-- `python -m pytest tests` -> 32 passed.
+- `python -m pytest tests\test_recommendation_chat.py` -> 8 passed.
+- `python -m pytest tests` -> 34 passed.
