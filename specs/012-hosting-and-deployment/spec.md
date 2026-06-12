@@ -1,4 +1,6 @@
-# 011 - Hosting and Deployment
+> Renumbered from Spec 011 after inserting Spec 007 Safety Guardrails.
+
+# 012 - Hosting and Deployment
 
 ## Goal
 

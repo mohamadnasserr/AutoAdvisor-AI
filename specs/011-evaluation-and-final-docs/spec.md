@@ -1,4 +1,6 @@
-# 010 - Evaluation and Demo
+> Renumbered from Spec 010 after inserting Spec 007 Safety Guardrails.
+
+# 011 - Evaluation + Final Docs
 
 ## Goal
 

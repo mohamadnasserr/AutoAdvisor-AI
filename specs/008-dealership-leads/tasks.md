@@ -1,4 +1,6 @@
-# Tasks - Dealership Leads
+> Renumbered from Spec 009 after inserting Spec 007 Safety Guardrails.
+
+# Tasks - Dealer Inquiry / Lead Capture
 
 - [x] Define dealership and dealer-lead SQLAlchemy models.
 - [x] Define dealer inquiry request/response schemas.

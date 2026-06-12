@@ -1,4 +1,7 @@
-# 008 - Image-Assisted Used-Car Price Estimation
+> Renumbered from Spec 008 and preserved as a supporting track within Spec 009
+> after inserting Spec 007 Safety Guardrails.
+
+# 009 Supporting Track - Image-Assisted Used-Car Price Estimation
 
 ## Goal
 

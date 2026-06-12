@@ -1,3 +1,5 @@
+> Renumbered from Spec 011 after inserting Spec 007 Safety Guardrails.
+
 # Tasks - Hosting and Deployment
 
 - [ ] Stabilize local MVP and automated smoke tests.

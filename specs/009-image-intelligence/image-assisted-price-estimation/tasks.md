@@ -1,3 +1,6 @@
+> Renumbered from Spec 008 and preserved as a supporting track within Spec 009
+> after inserting Spec 007 Safety Guardrails.
+
 # Tasks - Image-Assisted Used-Car Price Estimation
 
 - [ ] Define confirmed structured input schema.

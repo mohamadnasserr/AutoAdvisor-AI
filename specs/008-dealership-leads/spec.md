@@ -1,4 +1,6 @@
-# 009 - Dealership Leads
+> Renumbered from Spec 009 after inserting Spec 007 Safety Guardrails.
+
+# 008 - Dealer Inquiry / Lead Capture
 
 ## Goal
 

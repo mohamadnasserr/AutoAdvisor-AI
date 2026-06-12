@@ -1,4 +1,4 @@
-# 006 - RAG Car Knowledge
+# 006 - RAG Knowledge Base
 
 ## Goal
 

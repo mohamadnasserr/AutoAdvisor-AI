@@ -1,3 +1,5 @@
+> Renumbered from Spec 011 after inserting Spec 007 Safety Guardrails.
+
 # Plan - Hosting and Deployment
 
 1. Stabilize and test the local MVP.

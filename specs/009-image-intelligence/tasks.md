@@ -1,3 +1,5 @@
+> Renumbered from Spec 007 after inserting Spec 007 Safety Guardrails.
+
 # Tasks - Image Intelligence
 
 - [ ] Define upload validation and safety policy.

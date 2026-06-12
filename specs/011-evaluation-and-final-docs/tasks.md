@@ -1,4 +1,6 @@
-# Tasks - Evaluation and Demo
+> Renumbered from Spec 010 after inserting Spec 007 Safety Guardrails.
+
+# Tasks - Evaluation + Final Docs
 
 - [ ] Add first-party automated tests.
 - [ ] Create recommendation and extraction scenario sets.

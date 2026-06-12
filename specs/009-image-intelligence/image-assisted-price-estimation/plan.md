@@ -1,3 +1,6 @@
+> Renumbered from Spec 008 and preserved as a supporting track within Spec 009
+> after inserting Spec 007 Safety Guardrails.
+
 # Plan - Image-Assisted Used-Car Price Estimation
 
 Integrate only after image intelligence and the structured used-car price
