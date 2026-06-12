@@ -5,6 +5,8 @@ from sqlalchemy.orm import Session
 
 from backend.app.models.db_models import Document,DocumentChunk
 
+from sentence_transformers import SentenceTransformer
+from sqlalchemy import text
 
 STOPWORDS = {
     "a",
@@ -38,6 +40,9 @@ STOPWORDS = {
     "with",
 }
 
+EMBEDDING_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
+_embedding_model: SentenceTransformer | None = None
+
 
 @dataclass
 class RagSource:
@@ -53,6 +58,61 @@ def tokenize(text: str) -> set[str]:
     tokens = re.findall(r"[a-zA-Z0-9]+", text.lower())
     return {token for token in tokens if token not in STOPWORDS and len(token) > 2}
 
+def get_embedding_model() -> SentenceTransformer:
+    global _embedding_model
+
+    if _embedding_model is None:
+        _embedding_model = SentenceTransformer(EMBEDDING_MODEL_NAME)
+
+    return _embedding_model
+
+
+def retrieve_semantic_rag_sources(db: Session, query: str, limit: int = 3) -> list[RagSource]:
+    model = get_embedding_model()
+    query_embedding = model.encode([query], normalize_embeddings=True)[0]
+    query_vector = "[" + ",".join(str(float(value)) for value in query_embedding.tolist()) + "]"
+
+    rows = db.execute(
+        text(
+            """
+            SELECT
+                dc.chunk_index,
+                dc.text,
+                dc.category,
+                dc.source_url,
+                d.title,
+                1 - (dc.embedding <=> CAST(:query_embedding AS vector)) AS similarity
+            FROM document_chunks dc
+            JOIN documents d ON d.id = dc.document_id
+            WHERE dc.embedding IS NOT NULL
+            ORDER BY dc.embedding <=> CAST(:query_embedding AS vector)
+            LIMIT :limit;
+            """
+        ),
+        {
+            "query_embedding": query_vector,
+            "limit": limit,
+        },
+    ).fetchall()
+
+    sources: list[RagSource] = []
+
+    for row in rows:
+        sources.append(
+            RagSource(
+                title=row.title,
+                source_url=row.source_url,
+                category=row.category,
+                chunk_index=row.chunk_index,
+                text=row.text,
+                score=round(float(row.similarity) * 100),
+            )
+        )
+
+    if sources:
+        return sources
+
+    return retrieve_rag_sources(db, query, limit)
 
 def retrieve_rag_sources(db: Session, query: str, limit: int = 3) -> list[RagSource]:
     query_tokens = tokenize(query)
