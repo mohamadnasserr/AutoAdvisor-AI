@@ -42,7 +42,13 @@
 - [x] Reject corrupted or unreadable image files.
 - [x] Enforce minimum image resolution of 640x480.
 - [ ] Run NSFW/safety checks before permanent storage.
-- [ ] Add blur and brightness quality checks.
+- [x] Add image quality service.
+- [x] Add blur detection using OpenCV Laplacian variance.
+- [x] Add brightness scoring.
+- [x] Flag blurry images.
+- [x] Flag images that are too dark.
+- [x] Flag images that are too bright.
+- [x] Return image quality status and warnings.
 - [ ] Add vehicle visibility check.
 - [x] Return safe user-facing rejection messages.
 
@@ -55,6 +61,7 @@
 - [ ] Add price-estimator boundary tests.
 - [ ] Add RAG grounding/fallback tests.
 - [x] Add upload guardrail unit tests.
+- [x] Add image quality tests.
 - [ ] Verify image safety checks happen before permanent storage.
 - [x] Run the full test suite successfully.
 
@@ -64,4 +71,5 @@
 - `python -m pytest tests\test_recommendation_chat.py tests\test_guardrails.py`
   -> 15 passed.
 - `python -m pytest tests\test_upload_guardrails.py` -> passed.
-- `python -m pytest tests` -> 49 passed.
+- `python -m pytest tests\test_image_quality.py` -> passed.
+- `python -m pytest tests` -> 53 passed.
