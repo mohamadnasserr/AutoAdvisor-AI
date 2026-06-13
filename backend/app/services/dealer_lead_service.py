@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 
 from backend.app.models.db_models import Car, DealerLead
 from backend.app.models.schemas import DealerLeadCreateRequest, DealerLeadResponse
-
+from backend.app.services.preference_service import extract_preferences
 
 def build_dealer_inquiry_draft(car: Car) -> str:
     car_title = f"{car.year} {car.make} {car.model}"
@@ -49,3 +49,30 @@ def create_dealer_lead(
         message_draft=message_draft,
         status=lead.status,
     )
+
+def find_car_for_dealer_request(db: Session, message: str) -> Car | None:
+    text = message.lower()
+    prefs = extract_preferences(message)
+
+    query = db.query(Car)
+
+    if prefs.brand_preference:
+        query = query.filter(Car.make.ilike(f"%{prefs.brand_preference}%"))
+
+    if prefs.budget_max:
+        query = query.filter(Car.price_usd <= prefs.budget_max)
+
+    cars = query.order_by(Car.id.asc()).all()
+
+    if not cars:
+        cars = db.query(Car).order_by(Car.id.asc()).all()
+
+    for car in cars:
+        make = car.make.lower()
+        model = car.model.lower()
+        full_name = f"{make} {model}"
+
+        if full_name in text or model in text or make in text:
+            return car
+
+    return cars[0] if cars else None

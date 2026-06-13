@@ -18,6 +18,11 @@ from backend.app.services.recommendation_service import (
     build_recommendation_answer,
     recommend_cars,
 )
+from backend.app.models.schemas import DealerLeadCreateRequest
+from backend.app.services.dealer_lead_service import (
+    create_dealer_lead,
+    find_car_for_dealer_request,
+)
 
 from backend.app.services.rag_service import build_rag_answer, retrieve_semantic_rag_sources
 
@@ -153,9 +158,36 @@ def chat(request: ChatRequest, db: Session = Depends(get_db)):
             recommended_cars = cars_to_compare[:5]
 
     elif intent == "dealer_contact":
+
+        selected_car = find_car_for_dealer_request(db, request.message)
+
+        if selected_car is None:
+            answer = (
+                "I can prepare a dealer inquiry, but I could not find a matching car in the current inventory. "
+                "Please mention the make/model, for example: 'Connect me with the dealer for the Toyota Corolla'."
+            )
+        else:
+            lead_request = DealerLeadCreateRequest(
+                selected_car_id=selected_car.id,
+                user_location=prefs.region,
+                preferred_contact_method="phone",
+                budget=prefs.budget_max,
+            )
+
+        lead = create_dealer_lead(db, lead_request)
+
+        dealer_line = (
+            f"{lead.dealership_name} in {lead.dealership_location}"
+            if lead.dealership_name and lead.dealership_location
+            else "the matched dealership"
+        )
+
         answer = (
-            "Dealer connection workflow is coming next. The MVP will generate an inquiry draft "
-            "and store it only after user confirmation."
+            f"I created a draft dealer inquiry for the {selected_car.year} {selected_car.make} {selected_car.model}.\n\n"
+            f"Matched dealer: {dealer_line}\n"
+            f"Lead status: {lead.status}\n\n"
+            f"Inquiry draft:\n{lead.message_draft}\n\n"
+            "Note: I did not send this message automatically. This is a draft lead for demo/safety purposes."
         )
 
     elif intent == "image_analysis":

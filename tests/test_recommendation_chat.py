@@ -179,3 +179,29 @@ def test_chat_general_advice_uses_rag_sources():
     assert "Based on the AutoAdvisor knowledge base" in data["answer"]
     assert "Sources:" in data["answer"]
     assert "local://rag_docs/" in data["answer"]
+
+def test_chat_dealer_contact_creates_inquiry_draft():
+    cars_response = client.get("/cars")
+    assert cars_response.status_code == 200
+
+    cars_payload = cars_response.json()
+    cars = cars_payload.get("results", []) if isinstance(cars_payload, dict) else cars_payload
+    assert len(cars) > 0
+
+    selected_car = cars[0]
+
+    payload = {
+        "message": f"Connect me with the dealer for the {selected_car['make']} {selected_car['model']}",
+        "session_id": "dealer-contact-chat-test",
+    }
+
+    response = client.post("/chat", json=payload)
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["intent"] == "dealer_contact"
+    assert "I created a draft dealer inquiry" in data["answer"]
+    assert "Inquiry draft" in data["answer"]
+    assert "I did not send this message automatically" in data["answer"]
