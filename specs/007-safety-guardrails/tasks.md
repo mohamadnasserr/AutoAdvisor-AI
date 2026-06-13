@@ -2,17 +2,24 @@
 
 ## Text Guardrails
 
-- [ ] Define configurable chat message length limit.
-- [ ] Implement empty and whitespace-only message rejection.
-- [ ] Implement too-long message rejection.
-- [ ] Add prompt-injection detection before intent classification.
-- [ ] Block requests for secrets, API keys, system prompts, hidden
+- [x] Add text guardrail service.
+- [x] Define configurable chat message length limit.
+- [x] Implement empty and whitespace-only message rejection.
+- [x] Implement too-long message rejection.
+- [x] Add `/chat` guardrail check before intent classification.
+- [x] Add prompt-injection detection before intent classification.
+- [x] Block requests for secrets, API keys, system prompts, hidden
   instructions, and internal configuration.
-- [ ] Add safe handling for unsafe and off-topic requests.
-- [ ] Ensure normal car-buying questions remain allowed.
-- [ ] Prevent blocked text from reaching intent classification and downstream
+- [x] Block system-prompt, hidden-instruction, `.env`, API-key, and secret
+  requests.
+- [x] Block unsupported risky guarantee requests.
+- [x] Ensure normal car-buying questions remain allowed.
+- [x] Prevent blocked text from reaching intent classification and downstream
   AI services.
-- [ ] Add clear, safe refusal messages.
+- [x] Return safe refusal responses for blocked chat messages.
+- [x] Preserve chat memory logging for blocked messages.
+- [x] Allow normal car-buying messages to continue through the regular chat
+  flow.
 
 ## Price and RAG Boundaries
 
@@ -38,9 +45,19 @@
 
 ## Verification
 
-- [ ] Add text guardrail tests.
+- [x] Add focused text guardrail tests.
+- [x] Add chat tests proving prompt-injection is blocked before intent
+  classification.
+- [x] Add chat tests proving normal car-buying requests still pass.
 - [ ] Add price-estimator boundary tests.
 - [ ] Add RAG grounding/fallback tests.
 - [ ] Add upload validation tests.
 - [ ] Verify image safety checks happen before permanent storage.
-- [ ] Run the full test suite successfully.
+- [x] Run the full test suite successfully.
+
+### Test Results
+
+- `python -m pytest tests\test_guardrails.py` -> 6 passed.
+- `python -m pytest tests\test_recommendation_chat.py tests\test_guardrails.py`
+  -> 15 passed.
+- `python -m pytest tests` -> 43 passed.
