@@ -7,7 +7,7 @@ from backend.app.api.price_routes import router as price_router
 from backend.app.db.init_db import init_db
 from backend.app.models.schemas import HealthResponse
 from backend.app.api.comparison_routes import router as comparison_router
-
+from backend.app.api.dealer_routes import router as dealer_router
 
 app = FastAPI(
     title="AutoAdvisor AI API",
@@ -33,3 +33,4 @@ app.include_router(chat_router)
 app.include_router(car_router)
 app.include_router(comparison_router)
 app.include_router(price_router)
+app.include_router(dealer_router)

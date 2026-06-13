@@ -1,6 +1,6 @@
 # Tasks - Safety Guardrails
 
-**Status: MVP completed**
+**Status: Completed**
 
 ## Text Guardrails
 
@@ -45,9 +45,14 @@
 - [x] Enforce minimum image resolution of 640x480.
 - [x] Add image safety service.
 - [x] Add NSFW safety gate MVP.
+- [x] Upgrade NSFW safety gate to model-based detection.
+- [x] Use pretrained `Marqo/nsfw-image-detection-384` model through timm.
+- [x] Keep filename heuristic as an early safety fallback.
+- [x] Keep safe fallback behavior if the model is unavailable.
 - [x] Reject suspicious NSFW/explicit filenames.
 - [x] Reject empty image files in the safety gate.
-- [x] Return safe image status, NSFW score, reason, and safe response.
+- [x] Return NSFW score, reason, model name, and safe user-facing rejection
+  response.
 - [x] Add image quality service.
 - [x] Add blur detection using OpenCV Laplacian variance.
 - [x] Add brightness scoring.
@@ -73,15 +78,16 @@
 - [x] Add tests for detailed image, dark image, bright image, blurry image, and
   blank/low-detail image.
 - [x] Add image safety tests.
+- [x] Update image safety tests for model-based behavior.
 - [ ] Verify image safety checks happen before permanent storage.
 - [x] Run the full test suite successfully.
 
 ## Important Note
 
-- The current NSFW checker is an MVP safety-gate interface using filename
-  heuristics.
-- A future upgrade can replace or extend it with a pretrained NSFW image
-  classifier.
+- The NSFW safety gate uses the pretrained
+  `Marqo/nsfw-image-detection-384` model through timm.
+- Filename heuristics remain as an early safety fallback, and safe fallback
+  behavior is retained if the model is unavailable.
 
 ### Test Results
 
@@ -90,5 +96,6 @@
   -> 15 passed.
 - `python -m pytest tests\test_upload_guardrails.py` -> passed.
 - `python -m pytest tests\test_image_quality.py` -> passed.
-- `python -m pytest tests\test_image_safety.py` -> passed.
-- `python -m pytest tests` -> passed.
+- `python -m pytest tests\test_image_safety.py` -> 3 passed.
+- Manual safe-image check returned `safe/model_safe`.
+- `python -m pytest tests` -> all passed.
