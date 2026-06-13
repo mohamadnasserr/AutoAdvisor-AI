@@ -33,15 +33,18 @@
 
 ## Upload Guardrails
 
-- [ ] Define allowed extensions: `jpg`, `jpeg`, `png`, and `webp`.
-- [ ] Define allowed MIME types: `image/jpeg`, `image/png`, and `image/webp`.
-- [ ] Define and enforce maximum upload size.
-- [ ] Reject corrupted or undecodable images.
-- [ ] Enforce minimum image resolution.
+- [x] Add upload guardrail service.
+- [x] Validate allowed image extensions: `jpg`, `jpeg`, `png`, and `webp`.
+- [x] Validate allowed image MIME types: `image/jpeg`, `image/png`, and
+  `image/webp`.
+- [x] Reject empty uploads.
+- [x] Reject oversized uploads above 5 MB.
+- [x] Reject corrupted or unreadable image files.
+- [x] Enforce minimum image resolution of 640x480.
 - [ ] Run NSFW/safety checks before permanent storage.
 - [ ] Add blur and brightness quality checks.
 - [ ] Add vehicle visibility check.
-- [ ] Return clear rejection/correction messages.
+- [x] Return safe user-facing rejection messages.
 
 ## Verification
 
@@ -51,7 +54,7 @@
 - [x] Add chat tests proving normal car-buying requests still pass.
 - [ ] Add price-estimator boundary tests.
 - [ ] Add RAG grounding/fallback tests.
-- [ ] Add upload validation tests.
+- [x] Add upload guardrail unit tests.
 - [ ] Verify image safety checks happen before permanent storage.
 - [x] Run the full test suite successfully.
 
@@ -60,4 +63,5 @@
 - `python -m pytest tests\test_guardrails.py` -> 6 passed.
 - `python -m pytest tests\test_recommendation_chat.py tests\test_guardrails.py`
   -> 15 passed.
-- `python -m pytest tests` -> 43 passed.
+- `python -m pytest tests\test_upload_guardrails.py` -> passed.
+- `python -m pytest tests` -> 49 passed.
