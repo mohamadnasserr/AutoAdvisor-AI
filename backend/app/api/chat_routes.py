@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from backend.app.db.database import get_db
+from backend.app.services.guardrail_service import check_text_guardrails
 from backend.app.services.price_check_service import extract_price_check_request
 from backend.app.services.price_estimator_service import price_estimator
 from backend.app.services.chat_memory_service import ChatMemoryService
@@ -41,6 +42,30 @@ def build_listing_type_clarification(budget_max: float | None) -> str:
 
 @router.post("/chat", response_model=ChatResponse)
 def chat(request: ChatRequest, db: Session = Depends(get_db)):
+    guardrail_result = check_text_guardrails(request.message)
+
+    if not guardrail_result.allowed:
+        session_id = request.session_id or "default"
+
+        memory_service.add_message(
+            session_id=session_id,
+            role="user",
+            content=request.message,
+        )
+
+        memory_service.add_message(
+            session_id=session_id,
+            role="assistant",
+            content=guardrail_result.safe_response or "I cannot help with that request.",
+        )
+
+        return ChatResponse(
+            session_id=session_id,
+            intent="guardrail_blocked",
+            extracted_preferences=extract_preferences(request.message),
+            answer=guardrail_result.safe_response or "I cannot help with that request.",
+            recommended_cars=[],
+        )
     intent = classify_intent(request.message)
     prefs = extract_preferences(request.message)
     session_id = request.session_id or "default"
@@ -151,9 +176,9 @@ def chat(request: ChatRequest, db: Session = Depends(get_db)):
     )
 
     return ChatResponse(
-        session_id=session_id,
-        intent=intent,
-        extracted_preferences=prefs,
-        answer=answer,
-        recommended_cars=recommended_cars,
+    session_id=session_id,
+    intent=intent,
+    extracted_preferences=prefs,
+    answer=answer,
+    recommended_cars=recommended_cars,
     )
