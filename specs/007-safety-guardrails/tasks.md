@@ -45,11 +45,13 @@
 - [x] Add image quality service.
 - [x] Add blur detection using OpenCV Laplacian variance.
 - [x] Add brightness scoring.
+- [x] Add edge-density based vehicle visibility MVP check.
 - [x] Flag blurry images.
 - [x] Flag images that are too dark.
 - [x] Flag images that are too bright.
-- [x] Return image quality status and warnings.
-- [ ] Add vehicle visibility check.
+- [x] Flag blank/low-detail images where a vehicle is not clearly visible.
+- [x] Return image quality status, vehicle visibility status, edge density, and
+  warnings.
 - [x] Return safe user-facing rejection messages.
 
 ## Verification
@@ -62,6 +64,8 @@
 - [ ] Add RAG grounding/fallback tests.
 - [x] Add upload guardrail unit tests.
 - [x] Add image quality tests.
+- [x] Add tests for detailed image, dark image, bright image, blurry image, and
+  blank/low-detail image.
 - [ ] Verify image safety checks happen before permanent storage.
 - [x] Run the full test suite successfully.
 
@@ -72,4 +76,4 @@
   -> 15 passed.
 - `python -m pytest tests\test_upload_guardrails.py` -> passed.
 - `python -m pytest tests\test_image_quality.py` -> passed.
-- `python -m pytest tests` -> 53 passed.
+- `python -m pytest tests` -> passed.
