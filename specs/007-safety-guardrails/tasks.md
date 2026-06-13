@@ -1,5 +1,7 @@
 # Tasks - Safety Guardrails
 
+**Status: MVP completed**
+
 ## Text Guardrails
 
 - [x] Add text guardrail service.
@@ -41,7 +43,11 @@
 - [x] Reject oversized uploads above 5 MB.
 - [x] Reject corrupted or unreadable image files.
 - [x] Enforce minimum image resolution of 640x480.
-- [ ] Run NSFW/safety checks before permanent storage.
+- [x] Add image safety service.
+- [x] Add NSFW safety gate MVP.
+- [x] Reject suspicious NSFW/explicit filenames.
+- [x] Reject empty image files in the safety gate.
+- [x] Return safe image status, NSFW score, reason, and safe response.
 - [x] Add image quality service.
 - [x] Add blur detection using OpenCV Laplacian variance.
 - [x] Add brightness scoring.
@@ -66,8 +72,16 @@
 - [x] Add image quality tests.
 - [x] Add tests for detailed image, dark image, bright image, blurry image, and
   blank/low-detail image.
+- [x] Add image safety tests.
 - [ ] Verify image safety checks happen before permanent storage.
 - [x] Run the full test suite successfully.
+
+## Important Note
+
+- The current NSFW checker is an MVP safety-gate interface using filename
+  heuristics.
+- A future upgrade can replace or extend it with a pretrained NSFW image
+  classifier.
 
 ### Test Results
 
@@ -76,4 +90,5 @@
   -> 15 passed.
 - `python -m pytest tests\test_upload_guardrails.py` -> passed.
 - `python -m pytest tests\test_image_quality.py` -> passed.
+- `python -m pytest tests\test_image_safety.py` -> passed.
 - `python -m pytest tests` -> passed.
