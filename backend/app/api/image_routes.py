@@ -4,7 +4,7 @@ from backend.app.models.schemas import ImageAnalysisResponse
 from backend.app.services.image_quality_service import analyze_image_quality
 from backend.app.services.image_safety_service import check_image_safety
 from backend.app.services.upload_guardrail_service import validate_image_upload
-
+from backend.app.services.vehicle_image_metadata_service import extract_vehicle_image_metadata
 
 router = APIRouter(tags=["image-analysis"])
 
@@ -57,6 +57,13 @@ async def analyze_image(file: UploadFile = File(...)) -> ImageAnalysisResponse:
         if accepted_for_analysis
         else "Image passed safety checks but needs review before vehicle analysis."
     )
+    metadata = extract_vehicle_image_metadata(
+
+        file_bytes=file_bytes,
+        width=upload_result.width,
+        height=upload_result.height,
+        accepted_for_analysis=accepted_for_analysis,
+    )
 
     return ImageAnalysisResponse(
         safe_image=True,
@@ -72,4 +79,7 @@ async def analyze_image(file: UploadFile = File(...)) -> ImageAnalysisResponse:
         height=upload_result.height,
         accepted_for_analysis=accepted_for_analysis,
         message=message,
+        dominant_color=metadata.dominant_color,
+        estimated_body_type=metadata.estimated_body_type,
+        analysis_status=metadata.analysis_status,
     )

@@ -42,6 +42,28 @@ def test_image_analyze_accepts_safe_valid_image():
     assert data["quality_status"] in {"acceptable", "needs_review"}
     assert data["vehicle_visibility_status"] in {"possibly_visible", "not_visible_or_low_detail"}
     assert "Image passed safety" in data["message"]
+    assert data["dominant_color"] in {
+        "black",
+        "white",
+        "silver",
+        "gray",
+        "red",
+        "blue",
+        "green",
+        "yellow",
+        "brown",
+        "orange",
+        "unknown",
+    }
+    assert data["estimated_body_type"] in {
+        "sedan_or_coupe_like",
+        "suv_or_hatchback_like",
+        "unknown",
+    }
+    assert data["analysis_status"] in {
+        "metadata_estimated",
+        "needs_better_image_before_metadata_extraction",
+    }
 
 
 def test_image_analyze_rejects_unsupported_file_type():
@@ -76,6 +98,9 @@ def test_image_analyze_rejects_low_resolution_image():
     assert data["safety_reason"] == "image_resolution_too_low"
     assert data["width"] == 320
     assert data["height"] == 240
+    assert data["dominant_color"] is None
+    assert data["estimated_body_type"] is None
+    assert data["analysis_status"] is None
 
 
 def test_image_analyze_rejects_nsfw_filename_before_analysis():
@@ -93,3 +118,7 @@ def test_image_analyze_rejects_nsfw_filename_before_analysis():
     assert data["safe_image"] is False
     assert data["accepted_for_analysis"] is False
     assert data["safety_reason"] == "filename_safety_flag"
+    assert data["dominant_color"] is None
+    assert data["estimated_body_type"] is None
+    assert data["analysis_status"] is None
+    
