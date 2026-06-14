@@ -130,6 +130,7 @@ def apply_seed_values(car: Car, row, dealer: Dealership) -> None:
     car.platform_source = clean_optional_string(
         row.get("platform_source")
     ) or "curated_demo_seed"
+    car.image_url = clean_optional_string(row.get("image_url"))
     car.dealer_id = dealer.id
 
 
@@ -144,6 +145,7 @@ def seed_database() -> None:
 
         inserted_cars = 0
         skipped_cars = 0
+        updated_image_urls = 0
 
         for _, row in df.iterrows():
             dealer = get_or_create_dealer(db, row)
@@ -151,6 +153,9 @@ def seed_database() -> None:
             existing_car = find_existing_car(db, row)
 
             if existing_car is not None:
+                seed_image_url = clean_optional_string(row.get("image_url"))
+                if existing_car.image_url != seed_image_url:
+                    updated_image_urls += 1
                 apply_seed_values(existing_car, row, dealer)
                 skipped_cars += 1
                 continue
@@ -177,6 +182,7 @@ def seed_database() -> None:
                 platform_source=clean_optional_string(
                     row.get("platform_source")
                 ) or "curated_demo_seed",
+                image_url=clean_optional_string(row.get("image_url")),
                 dealer_id=dealer.id,
             )
 
@@ -191,6 +197,7 @@ def seed_database() -> None:
         print("Seed database completed successfully.")
         print(f"Inserted cars: {inserted_cars}")
         print(f"Skipped existing cars: {skipped_cars}")
+        print(f"Existing car image URLs updated: {updated_image_urls}")
         print(f"Total cars in database: {total_cars}")
         print(f"Total dealerships in database: {total_dealers}")
 

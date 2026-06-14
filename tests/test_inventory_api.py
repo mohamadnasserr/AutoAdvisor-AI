@@ -42,6 +42,7 @@ def test_get_car_by_id_returns_one_car():
     assert "make" in data
     assert "model" in data
     assert "listing_type" in data
+    assert "image_url" in data
 
 
 def test_get_missing_car_returns_404():
@@ -103,6 +104,7 @@ def test_search_cars_supports_nullable_mileage_for_new_cars():
     for car in data["results"]:
         assert "mileage_km" in car
         assert "warranty_years" in car
+        assert "image_url" in car
 
 def test_get_new_car_includes_warranty_and_zero_mileage():
     response = client.get(

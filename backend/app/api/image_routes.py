@@ -1,8 +1,15 @@
-from fastapi import APIRouter, File, UploadFile
+from fastapi import APIRouter, Depends, File, UploadFile
+from sqlalchemy.orm import Session
 
-from backend.app.models.schemas import ImageAnalysisResponse
+from backend.app.db.database import get_db
+from backend.app.models.schemas import (
+    ImageAnalysisResponse,
+    SimilarCarsRequest,
+    SimilarCarsResponse,
+)
 from backend.app.services.image_quality_service import analyze_image_quality
 from backend.app.services.image_safety_service import check_image_safety
+from backend.app.services.similar_car_service import find_similar_cars
 from backend.app.services.upload_guardrail_service import validate_image_upload
 from backend.app.services.vehicle_image_metadata_service import extract_vehicle_image_metadata
 
@@ -82,4 +89,21 @@ async def analyze_image(file: UploadFile = File(...)) -> ImageAnalysisResponse:
         dominant_color=metadata.dominant_color,
         estimated_body_type=metadata.estimated_body_type,
         analysis_status=metadata.analysis_status,
+    )
+
+
+@router.post("/image/similar-cars", response_model=SimilarCarsResponse)
+def similar_cars_from_confirmed_details(
+    request: SimilarCarsRequest,
+    db: Session = Depends(get_db),
+) -> SimilarCarsResponse:
+    similar_cars, query_summary, explanation = find_similar_cars(
+        db=db,
+        request=request,
+    )
+
+    return SimilarCarsResponse(
+        query_summary=query_summary,
+        similar_cars=similar_cars,
+        explanation=explanation,
     )

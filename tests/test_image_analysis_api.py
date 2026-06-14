@@ -121,4 +121,48 @@ def test_image_analyze_rejects_nsfw_filename_before_analysis():
     assert data["dominant_color"] is None
     assert data["estimated_body_type"] is None
     assert data["analysis_status"] is None
-    
+
+
+def test_image_similar_cars_returns_inventory_matches_without_upload():
+    inventory_response = client.get("/cars")
+    inventory_ids = {
+        car["id"] for car in inventory_response.json()["results"]
+    }
+
+    response = client.post(
+        "/image/similar-cars",
+        json={
+            "make": "Toyota",
+            "model": "Corolla",
+            "year": 2018,
+            "mileage_km": 90000,
+            "body_type": "Sedan",
+            "fuel": "Petrol",
+            "transmission": "Automatic",
+            "budget_max": 12000,
+        },
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["query_summary"]
+    assert data["explanation"]
+    assert 1 <= len(data["similar_cars"]) <= 5
+    assert all(car["id"] in inventory_ids for car in data["similar_cars"])
+    assert all(car["availability_status"] != "sold" for car in data["similar_cars"])
+
+
+def test_image_similar_cars_defaults_to_used_inventory():
+    response = client.post(
+        "/image/similar-cars",
+        json={"body_type": "SUV", "fuel": "Petrol"},
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["similar_cars"]
+    assert all(car["listing_type"] == "used" for car in data["similar_cars"])
