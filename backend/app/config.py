@@ -12,6 +12,7 @@ class Settings(BaseSettings):
 
     llm_provider: str = "none"
     openai_api_key: str | None = None
+    openai_model: str = "gpt-5.5"
     gemini_api_key: str | None = None
 
     redis_url: str = "redis://localhost:6379/0"

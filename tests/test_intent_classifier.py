@@ -11,6 +11,24 @@ def test_ml_intent_classifier_routes_recommendation():
     assert intent == "car_recommendation"
 
 
+def test_deterministic_override_routes_clear_shopping_request():
+    intent = classify_intent("Reliable used car under $10,000 in Beirut")
+
+    assert intent == "car_recommendation"
+
+
+def test_deterministic_override_routes_concise_shopping_request():
+    intent = classify_intent("Reliable sedan in Beirut")
+
+    assert intent == "car_recommendation"
+
+
+def test_greeting_does_not_route_to_general_advice():
+    intent = classify_intent("hello")
+
+    assert intent == "greeting"
+
+
 def test_ml_intent_classifier_routes_comparison():
     intent = classify_intent("Compare Corolla and Civic")
 
@@ -51,6 +69,7 @@ def test_intent_classifier_returns_confidence_or_fallback_none():
         "image_analysis",
         "dealer_contact",
         "general_advice",
+        "greeting",
     }
 
     if confidence is not None:

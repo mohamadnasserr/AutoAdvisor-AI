@@ -27,6 +27,56 @@ def test_chat_recommends_used_city_car_under_budget():
         assert car["price_usd"] <= 11500
 
 
+def test_chat_routes_clear_used_car_shopping_request_to_recommendations():
+    response = client.post(
+        "/chat",
+        json={
+            "message": "Reliable used car under $10,000 in Beirut",
+            "session_id": "recommendation-override-test",
+        },
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["intent"] == "car_recommendation"
+    assert data["extracted_preferences"]["listing_type"] == "used"
+    assert "Based on the AutoAdvisor knowledge base" not in data["answer"]
+    assert data["recommended_cars"] or "could not find a strong match" in data["answer"]
+
+
+def test_chat_greeting_returns_help_instead_of_rag_advice():
+    response = client.post(
+        "/chat",
+        json={"message": "hello", "session_id": "greeting-test"},
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["intent"] == "greeting"
+    assert "Based on the AutoAdvisor knowledge base" not in data["answer"]
+    assert "AutoAdvisor AI" in data["answer"]
+    assert "What are you looking for?" in data["answer"]
+    assert not data["answer"].lstrip().startswith("{")
+
+
+def test_chat_how_are_you_returns_greeting_without_rag():
+    response = client.post(
+        "/chat",
+        json={"message": "how are you", "session_id": "greeting-how-are-you-test"},
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["intent"] == "greeting"
+    assert "Based on the AutoAdvisor knowledge base" not in data["answer"]
+
+
 def test_chat_comparison_requires_at_least_two_inventory_models():
     cars_response = client.get("/cars")
     cars_data = cars_response.json()

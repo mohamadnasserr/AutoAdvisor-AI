@@ -1,17 +1,121 @@
-listing_type,is_new,make,model,trim,year,price_usd,mileage_km,body_type,fuel,transmission,color,condition,warranty_years,region,dealer_name
-used,false,Toyota,Corolla,Base,2018,10500,90000,Sedan,Petrol,Automatic,White,Good,,Beirut,Beirut Auto
-used,false,Kia,Picanto,EX,2019,8200,70000,Hatchback,Petrol,Automatic,Silver,Good,,Jounieh,Cedar Motors
-used,false,Honda,Civic,LX,2017,11500,110000,Sedan,Petrol,Automatic,Black,Good,,Beirut,Beirut Auto
-used,false,Hyundai,Tucson,GLS,2018,16000,95000,SUV,Petrol,Automatic,Grey,Good,,Zahle,Auto House
-used,false,BMW,320i,Base,2016,14500,120000,Sedan,Petrol,Automatic,Black,Fair,,Beirut,Premium Cars
-used,false,Mercedes-Benz,C200,Base,2015,15000,130000,Sedan,Petrol,Automatic,White,Fair,,Beirut,Premium Cars
-used,false,Toyota,Yaris,Base,2020,9800,60000,Hatchback,Petrol,Automatic,Red,Good,,Tripoli,North Motors
-used,false,Nissan,Sunny,SV,2019,9000,85000,Sedan,Petrol,Automatic,Silver,Good,,Saida,South Auto
-used,false,Kia,Sportage,EX,2017,15500,105000,SUV,Petrol,Automatic,Blue,Good,,Jounieh,Cedar Motors
-used,false,Hyundai,Elantra,GL,2018,9800,95000,Sedan,Petrol,Automatic,White,Good,,Zahle,Auto House
-new,true,Kia,Picanto,Base,2024,16500,0,Hatchback,Petrol,Automatic,White,New,3,Beirut,Cedar Motors
-new,true,Hyundai,Grand i10,Base,2024,15500,0,Hatchback,Petrol,Automatic,Silver,New,3,Beirut,Auto House
-new,true,Toyota,Corolla,Hybrid,2024,28500,0,Sedan,Hybrid,Automatic,White,New,3,Beirut,Beirut Auto
-new,true,Nissan,Sunny,SV,2024,18500,0,Sedan,Petrol,Automatic,Grey,New,3,Saida,South Auto
-new,true,Hyundai,Tucson,GLS,2024,33500,0,SUV,Petrol,Automatic,Black,New,3,Zahle,Auto House
-new,true,Kia,Sportage,EX,2024,34500,0,SUV,Petrol,Automatic,White,New,3,Jounieh,Cedar Motors
+listing_type,is_new,make,model,trim,year,price_usd,mileage_km,body_type,fuel,transmission,color,condition,warranty_years,region,dealer_name,availability_status,platform_source
+used,false,Toyota,Corolla,Base,2018,10500,90000,Sedan,Petrol,Automatic,White,Good,,Beirut,Beirut Auto Hub,available,curated_demo_seed
+used,false,Toyota,Yaris,Base,2020,9800,60000,Hatchback,Petrol,Automatic,Red,Good,,Tripoli,North Coast Motors,available,dealer_demo_feed
+used,false,Toyota,Camry,SE,2017,14800,118000,Sedan,Petrol,Automatic,Silver,Good,,Mount Lebanon,Levant Auto Gallery,reserved,approved_partner_demo
+used,false,Toyota,RAV4,XLE,2019,23500,79000,SUV,Hybrid,Automatic,Blue,Very Good,,Baabda,Baabda Car Center,available,curated_demo_seed
+used,false,Toyota,Hilux,SR5,2016,21500,145000,Pickup,Diesel,Manual,White,Good,,Zahle,Bekaa Drive Center,available,dealer_demo_feed
+used,false,Nissan,Sunny,SV,2019,9000,85000,Sedan,Petrol,Automatic,Silver,Good,,Saida,South Gate Auto,available,curated_demo_seed
+used,false,Nissan,Altima,SL,2017,12800,112000,Sedan,Petrol,Automatic,Black,Good,,Beirut,Beirut Auto Hub,sold,approved_partner_demo
+used,false,Nissan,Qashqai,SV,2018,15800,96000,SUV,Petrol,Automatic,White,Good,,Jounieh,Cedar Motors,available,dealer_demo_feed
+used,false,Nissan,X-Trail,SL,2020,22500,72000,SUV,Petrol,Automatic,Silver,Very Good,,Byblos,Byblos Motor House,available,curated_demo_seed
+used,false,Nissan,Navara,SE,2017,19800,137000,Pickup,Diesel,Manual,Black,Good,,Nabatieh,Nabatieh Auto Point,reserved,dealer_demo_feed
+used,false,Honda,Civic,LX,2017,11500,110000,Sedan,Petrol,Automatic,Black,Good,,Beirut,Beirut Auto Hub,available,curated_demo_seed
+used,false,Honda,Accord,EX,2017,15700,109000,Sedan,Petrol,Automatic,White,Good,,Mount Lebanon,Levant Auto Gallery,available,approved_partner_demo
+used,false,Honda,CR-V,EX-L,2019,24200,76000,SUV,Petrol,Automatic,Silver,Very Good,,Baabda,Baabda Car Center,available,dealer_demo_feed
+used,false,Honda,HR-V,EX,2020,20500,65000,SUV,Petrol,Automatic,Grey,Very Good,,Keserwan,Keserwan Mobility,reserved,curated_demo_seed
+used,false,Honda,City,LX,2019,10500,78000,Sedan,Petrol,Automatic,Blue,Good,,Saida,South Gate Auto,available,dealer_demo_feed
+used,false,Hyundai,Elantra,GL,2018,9800,95000,Sedan,Petrol,Automatic,White,Good,,Zahle,Bekaa Drive Center,available,curated_demo_seed
+used,false,Hyundai,Accent,GLS,2020,11000,67000,Sedan,Petrol,Automatic,Silver,Good,,Tripoli,North Coast Motors,available,dealer_demo_feed
+used,false,Hyundai,Tucson,GLS,2018,16000,95000,SUV,Petrol,Automatic,Grey,Good,,Zahle,Bekaa Drive Center,available,approved_partner_demo
+used,false,Hyundai,Santa Fe,Limited,2017,20500,121000,SUV,Diesel,Automatic,Black,Good,,Mount Lebanon,Levant Auto Gallery,sold,dealer_demo_feed
+used,false,Hyundai,i10,GL,2021,9800,43000,Hatchback,Petrol,Automatic,Red,Very Good,,Jounieh,Cedar Motors,available,curated_demo_seed
+used,false,Kia,Picanto,EX,2019,8200,70000,Hatchback,Petrol,Automatic,Silver,Good,,Jounieh,Cedar Motors,available,curated_demo_seed
+used,false,Kia,Rio,EX,2018,9800,85000,Sedan,Petrol,Automatic,White,Good,,Saida,South Gate Auto,available,dealer_demo_feed
+used,false,Kia,Cerato,EX,2020,13500,64000,Sedan,Petrol,Automatic,Black,Very Good,,Beirut,Beirut Auto Hub,reserved,approved_partner_demo
+used,false,Kia,Sportage,EX,2017,15500,105000,SUV,Petrol,Automatic,Blue,Good,,Jounieh,Cedar Motors,available,curated_demo_seed
+used,false,Kia,Sorento,LX,2017,18800,128000,SUV,Diesel,Automatic,Grey,Good,,Zahle,Bekaa Drive Center,available,dealer_demo_feed
+used,false,Mitsubishi,Lancer,EX,2016,8800,132000,Sedan,Petrol,Automatic,White,Fair,,Nabatieh,Nabatieh Auto Point,available,curated_demo_seed
+used,false,Mitsubishi,ASX,GLX,2018,14700,101000,SUV,Petrol,Automatic,Silver,Good,,Byblos,Byblos Motor House,available,dealer_demo_feed
+used,false,Mitsubishi,Outlander,GLS,2019,19700,91000,SUV,Petrol,Automatic,Black,Good,,Mount Lebanon,Levant Auto Gallery,reserved,approved_partner_demo
+used,false,Mitsubishi,L200,GLX,2017,18600,149000,Pickup,Diesel,Manual,White,Good,,Zahle,Bekaa Drive Center,available,curated_demo_seed
+used,false,Mitsubishi,Pajero,GLS,2016,22400,156000,SUV,Petrol,Automatic,Grey,Good,,Baabda,Baabda Car Center,sold,dealer_demo_feed
+used,false,Renault,Clio,Dynamic,2019,8500,74000,Hatchback,Petrol,Automatic,Red,Good,,Beirut,Beirut Auto Hub,available,curated_demo_seed
+used,false,Renault,Megane,SE,2018,9900,93000,Sedan,Petrol,Automatic,Blue,Good,,Jounieh,Cedar Motors,available,dealer_demo_feed
+used,false,Renault,Duster,SE,2020,14200,76000,SUV,Petrol,Automatic,White,Very Good,,Tripoli,North Coast Motors,available,approved_partner_demo
+used,false,Renault,Kangoo,Express,2017,10500,126000,Van,Diesel,Manual,Silver,Good,,Saida,South Gate Auto,reserved,curated_demo_seed
+used,false,Peugeot,208,Allure,2019,9200,71000,Hatchback,Petrol,Automatic,Yellow,Good,,Byblos,Byblos Motor House,available,dealer_demo_feed
+used,false,Peugeot,301,Active,2018,8800,98000,Sedan,Diesel,Manual,White,Good,,Nabatieh,Nabatieh Auto Point,available,curated_demo_seed
+used,false,Peugeot,3008,Allure,2020,19900,68000,SUV,Petrol,Automatic,Grey,Very Good,,Mount Lebanon,Levant Auto Gallery,available,approved_partner_demo
+used,false,Peugeot,Partner,Utility,2017,11200,139000,Van,Diesel,Manual,White,Good,,Zahle,Bekaa Drive Center,sold,dealer_demo_feed
+used,false,Chevrolet,Spark,LT,2019,7600,65000,Hatchback,Petrol,Automatic,Red,Good,,Tripoli,North Coast Motors,available,curated_demo_seed
+used,false,Chevrolet,Cruze,LT,2017,8900,108000,Sedan,Petrol,Automatic,Black,Good,,Beirut,Beirut Auto Hub,available,dealer_demo_feed
+used,false,Chevrolet,Equinox,LT,2019,17200,89000,SUV,Petrol,Automatic,White,Good,,Baabda,Baabda Car Center,reserved,approved_partner_demo
+used,false,Chevrolet,Tahoe,LT,2016,26500,142000,SUV,Petrol,Automatic,Black,Good,,Keserwan,Keserwan Mobility,available,curated_demo_seed
+used,false,Mazda,2,GT,2019,9800,72000,Hatchback,Petrol,Automatic,Blue,Good,,Jounieh,Cedar Motors,available,dealer_demo_feed
+used,false,Mazda,3,GT,2018,12600,91000,Sedan,Petrol,Automatic,Red,Good,,Beirut,Beirut Auto Hub,available,curated_demo_seed
+used,false,Mazda,6,Signature,2017,14700,115000,Sedan,Petrol,Automatic,Grey,Good,,Mount Lebanon,Levant Auto Gallery,sold,approved_partner_demo
+used,false,Mazda,CX-5,GT,2020,22800,69000,SUV,Petrol,Automatic,White,Very Good,,Byblos,Byblos Motor House,available,dealer_demo_feed
+used,false,Volkswagen,Golf,Comfortline,2018,13900,98000,Hatchback,Petrol,Automatic,Black,Good,,Beirut,Beirut Auto Hub,available,curated_demo_seed
+used,false,Volkswagen,Jetta,SE,2017,11800,116000,Sedan,Petrol,Automatic,Silver,Good,,Saida,South Gate Auto,available,dealer_demo_feed
+used,false,Volkswagen,Tiguan,SEL,2019,22100,84000,SUV,Petrol,Automatic,White,Very Good,,Baabda,Baabda Car Center,reserved,approved_partner_demo
+used,false,Volkswagen,Caddy,Maxi,2018,15600,128000,Van,Diesel,Manual,Blue,Good,,Zahle,Bekaa Drive Center,available,curated_demo_seed
+used,false,Mercedes-Benz,C200,Base,2015,15000,130000,Sedan,Petrol,Automatic,White,Fair,,Beirut,Beirut Auto Hub,available,dealer_demo_feed
+used,false,Mercedes-Benz,E300,AMG Line,2017,25800,114000,Sedan,Petrol,Automatic,Black,Good,,Mount Lebanon,Levant Auto Gallery,reserved,approved_partner_demo
+used,false,Mercedes-Benz,GLC250,4Matic,2018,31500,97000,SUV,Petrol,Automatic,Grey,Very Good,,Keserwan,Keserwan Mobility,available,curated_demo_seed
+used,false,Mercedes-Benz,Vito,Tourer,2017,28500,151000,Van,Diesel,Automatic,Silver,Good,,Baabda,Baabda Car Center,available,dealer_demo_feed
+used,false,BMW,320i,Base,2016,14500,120000,Sedan,Petrol,Automatic,Black,Fair,,Beirut,Beirut Auto Hub,available,curated_demo_seed
+used,false,BMW,520i,Luxury,2017,23900,108000,Sedan,Petrol,Automatic,White,Good,,Mount Lebanon,Levant Auto Gallery,sold,approved_partner_demo
+used,false,BMW,X1,sDrive20i,2019,25700,79000,SUV,Petrol,Automatic,Blue,Very Good,,Jounieh,Cedar Motors,available,dealer_demo_feed
+used,false,BMW,X5,xDrive35i,2016,29800,132000,SUV,Petrol,Automatic,Grey,Good,,Keserwan,Keserwan Mobility,reserved,curated_demo_seed
+used,false,Audi,A3,Premium,2018,17900,97000,Sedan,Petrol,Automatic,Black,Good,,Beirut,Beirut Auto Hub,available,dealer_demo_feed
+used,false,Audi,A4,Premium Plus,2017,19200,111000,Sedan,Petrol,Automatic,White,Good,,Byblos,Byblos Motor House,available,curated_demo_seed
+used,false,Audi,Q3,Quattro,2019,26900,81000,SUV,Petrol,Automatic,Grey,Very Good,,Baabda,Baabda Car Center,available,approved_partner_demo
+used,false,Audi,Q7,Quattro,2016,33500,139000,SUV,Diesel,Automatic,Black,Good,,Mount Lebanon,Levant Auto Gallery,sold,dealer_demo_feed
+used,false,Lexus,IS250,Premium,2016,20500,121000,Sedan,Petrol,Automatic,Silver,Good,,Beirut,Beirut Auto Hub,available,curated_demo_seed
+used,false,Lexus,ES300h,Hybrid,2018,27500,93000,Sedan,Hybrid,Automatic,White,Very Good,,Mount Lebanon,Levant Auto Gallery,reserved,approved_partner_demo
+used,false,Lexus,NX300h,Hybrid,2019,34800,82000,SUV,Hybrid,Automatic,Grey,Very Good,,Keserwan,Keserwan Mobility,available,dealer_demo_feed
+used,false,Lexus,RX350,Premium,2017,32900,110000,SUV,Petrol,Automatic,Black,Good,,Baabda,Baabda Car Center,available,curated_demo_seed
+used,false,Ford,Fiesta,Titanium,2018,8800,89000,Hatchback,Petrol,Automatic,Blue,Good,,Tripoli,North Coast Motors,available,dealer_demo_feed
+used,false,Ford,Focus,SE,2017,9900,106000,Sedan,Petrol,Automatic,White,Good,,Saida,South Gate Auto,available,curated_demo_seed
+used,false,Ford,Escape,SEL,2019,18400,88000,SUV,Petrol,Automatic,Grey,Good,,Byblos,Byblos Motor House,reserved,approved_partner_demo
+used,false,Ford,Ranger,XLT,2018,23800,136000,Pickup,Diesel,Automatic,Black,Good,,Nabatieh,Nabatieh Auto Point,available,dealer_demo_feed
+used,false,Jeep,Renegade,Limited,2019,17700,86000,SUV,Petrol,Automatic,Red,Good,,Jounieh,Cedar Motors,available,curated_demo_seed
+used,false,Jeep,Cherokee,Limited,2018,22600,102000,SUV,Petrol,Automatic,White,Good,,Baabda,Baabda Car Center,available,dealer_demo_feed
+used,false,Jeep,Grand Cherokee,Limited,2017,28900,125000,SUV,Petrol,Automatic,Black,Good,,Keserwan,Keserwan Mobility,reserved,approved_partner_demo
+used,false,Jeep,Wrangler,Sahara,2016,31500,117000,SUV,Petrol,Manual,Grey,Good,,Mount Lebanon,Levant Auto Gallery,available,curated_demo_seed
+used,false,Chevrolet,Camaro,LT,2017,24500,84000,Coupe,Petrol,Automatic,Yellow,Good,,Beirut,Beirut Auto Hub,available,dealer_demo_feed
+used,false,BMW,420i,Sport,2018,26900,91000,Coupe,Petrol,Automatic,Blue,Very Good,,Byblos,Byblos Motor House,reserved,approved_partner_demo
+used,false,Audi,TT,S Line,2017,27800,76000,Coupe,Petrol,Automatic,Red,Very Good,,Jounieh,Cedar Motors,available,curated_demo_seed
+used,false,Nissan,Leaf,SV,2020,16500,52000,Hatchback,Electric,Automatic,White,Very Good,,Beirut,Beirut Auto Hub,available,dealer_demo_feed
+used,false,Volkswagen,e-Golf,SE,2019,17800,59000,Hatchback,Electric,Automatic,Blue,Very Good,,Mount Lebanon,Levant Auto Gallery,sold,approved_partner_demo
+used,false,Renault,Zoe,Intens,2020,14900,47000,Hatchback,Electric,Automatic,White,Very Good,,Baabda,Baabda Car Center,available,curated_demo_seed
+new,true,Toyota,Corolla,LE,2025,26900,0,Sedan,Petrol,Automatic,White,New,3,Beirut,Beirut Auto Hub,available,curated_demo_seed
+new,true,Toyota,Corolla,Hybrid,2024,28500,0,Sedan,Hybrid,Automatic,White,New,3,Beirut,Beirut Auto Hub,reserved,approved_partner_demo
+new,true,Toyota,Yaris,SE,2025,21800,0,Hatchback,Petrol,Automatic,Red,New,3,Tripoli,North Coast Motors,available,dealer_demo_feed
+new,true,Toyota,RAV4,Hybrid XLE,2025,42500,15,SUV,Hybrid,Automatic,Blue,New,3,Baabda,Baabda Car Center,available,curated_demo_seed
+new,true,Nissan,Sunny,SV,2024,18500,0,Sedan,Petrol,Automatic,Grey,New,3,Saida,South Gate Auto,available,dealer_demo_feed
+new,true,Nissan,Qashqai,SV,2025,32900,0,SUV,Petrol,Automatic,White,New,3,Jounieh,Cedar Motors,available,approved_partner_demo
+new,true,Nissan,X-Trail,SL,2026,39800,10,SUV,Hybrid,Automatic,Silver,New,3,Byblos,Byblos Motor House,reserved,curated_demo_seed
+new,true,Nissan,Navara,SE,2025,36500,0,Pickup,Diesel,Manual,Black,New,3,Nabatieh,Nabatieh Auto Point,available,dealer_demo_feed
+new,true,Honda,Civic,LX,2025,31800,0,Sedan,Petrol,Automatic,Black,New,3,Beirut,Beirut Auto Hub,available,curated_demo_seed
+new,true,Honda,City,LX,2025,24500,0,Sedan,Petrol,Automatic,White,New,3,Saida,South Gate Auto,available,dealer_demo_feed
+new,true,Honda,CR-V,Hybrid,2025,44800,20,SUV,Hybrid,Automatic,Silver,New,3,Mount Lebanon,Levant Auto Gallery,reserved,approved_partner_demo
+new,true,Hyundai,Grand i10,Base,2024,15500,0,Hatchback,Petrol,Automatic,Silver,New,3,Beirut,Beirut Auto Hub,available,curated_demo_seed
+new,true,Hyundai,Elantra,GLS,2025,24800,0,Sedan,Petrol,Automatic,White,New,3,Zahle,Bekaa Drive Center,available,dealer_demo_feed
+new,true,Hyundai,Tucson,GLS,2024,33500,0,SUV,Petrol,Automatic,Black,New,3,Zahle,Bekaa Drive Center,available,approved_partner_demo
+new,true,Hyundai,Ioniq 5,Premium,2025,48500,25,SUV,Electric,Automatic,Grey,New,5,Mount Lebanon,Levant Auto Gallery,reserved,curated_demo_seed
+new,true,Kia,Picanto,Base,2024,16500,0,Hatchback,Petrol,Automatic,White,New,3,Beirut,Cedar Motors,available,dealer_demo_feed
+new,true,Kia,Cerato,EX,2025,25500,0,Sedan,Petrol,Automatic,Blue,New,5,Beirut,Beirut Auto Hub,available,curated_demo_seed
+new,true,Kia,Sportage,EX,2024,34500,0,SUV,Petrol,Automatic,White,New,3,Jounieh,Cedar Motors,available,approved_partner_demo
+new,true,Kia,EV6,GT-Line,2025,52900,30,SUV,Electric,Automatic,Black,New,5,Mount Lebanon,Levant Auto Gallery,reserved,dealer_demo_feed
+new,true,Mitsubishi,ASX,GLX,2025,29400,0,SUV,Petrol,Automatic,Silver,New,3,Byblos,Byblos Motor House,available,curated_demo_seed
+new,true,Mitsubishi,Outlander,GLS,2025,39700,0,SUV,Hybrid,Automatic,White,New,3,Baabda,Baabda Car Center,available,dealer_demo_feed
+new,true,Mitsubishi,L200,GLX,2025,34800,0,Pickup,Diesel,Manual,Grey,New,3,Zahle,Bekaa Drive Center,reserved,approved_partner_demo
+new,true,Renault,Clio,Techno,2025,21600,0,Hatchback,Petrol,Automatic,Red,New,3,Beirut,Beirut Auto Hub,available,curated_demo_seed
+new,true,Renault,Duster,Iconic,2025,27900,0,SUV,Petrol,Automatic,White,New,3,Tripoli,North Coast Motors,available,dealer_demo_feed
+new,true,Renault,Kangoo,Express,2025,26500,0,Van,Diesel,Manual,Silver,New,3,Saida,South Gate Auto,available,approved_partner_demo
+new,true,Peugeot,208,Allure,2025,23800,0,Hatchback,Petrol,Automatic,Yellow,New,3,Byblos,Byblos Motor House,available,curated_demo_seed
+new,true,Peugeot,3008,Allure,2025,38200,0,SUV,Hybrid,Automatic,Grey,New,3,Mount Lebanon,Levant Auto Gallery,reserved,dealer_demo_feed
+new,true,Chevrolet,Groove,Premier,2025,25200,0,SUV,Petrol,Automatic,White,New,3,Beirut,Beirut Auto Hub,available,approved_partner_demo
+new,true,Chevrolet,Tahoe,LT,2025,78500,20,SUV,Petrol,Automatic,Black,New,3,Keserwan,Keserwan Mobility,available,curated_demo_seed
+new,true,Mazda,3,GT,2025,30900,0,Sedan,Petrol,Automatic,Red,New,3,Jounieh,Cedar Motors,available,dealer_demo_feed
+new,true,Mazda,CX-5,GT,2025,41800,0,SUV,Petrol,Automatic,White,New,3,Baabda,Baabda Car Center,reserved,approved_partner_demo
+new,true,Volkswagen,Golf,Life,2025,33500,0,Hatchback,Petrol,Automatic,Blue,New,3,Beirut,Beirut Auto Hub,available,curated_demo_seed
+new,true,Volkswagen,Tiguan,R-Line,2025,46500,0,SUV,Petrol,Automatic,Grey,New,3,Mount Lebanon,Levant Auto Gallery,available,dealer_demo_feed
+new,true,Mercedes-Benz,C200,Avantgarde,2025,62500,15,Sedan,Hybrid,Automatic,White,New,3,Beirut,Beirut Auto Hub,reserved,approved_partner_demo
+new,true,BMW,320i,Sport,2025,59800,10,Sedan,Petrol,Automatic,Black,New,3,Keserwan,Keserwan Mobility,available,curated_demo_seed
+new,true,Audi,A3,Premium,2025,51200,0,Sedan,Petrol,Automatic,Grey,New,3,Byblos,Byblos Motor House,available,dealer_demo_feed
+new,true,Lexus,NX350h,Hybrid,2025,64800,20,SUV,Hybrid,Automatic,White,New,4,Mount Lebanon,Levant Auto Gallery,reserved,approved_partner_demo
+new,true,Ford,Escape,SEL,2025,38500,0,SUV,Petrol,Automatic,Grey,New,3,Byblos,Byblos Motor House,available,dealer_demo_feed
+new,true,Ford,Ranger,XLT,2025,45900,0,Pickup,Diesel,Automatic,Blue,New,3,Nabatieh,Nabatieh Auto Point,available,curated_demo_seed
+new,true,Jeep,Wrangler,Sahara,2025,68500,25,SUV,Petrol,Automatic,Black,New,3,Baabda,Baabda Car Center,available,dealer_demo_feed

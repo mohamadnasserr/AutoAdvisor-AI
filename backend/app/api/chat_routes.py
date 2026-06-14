@@ -13,6 +13,7 @@ from backend.app.services.comparison_service import (
     find_cars_for_comparison_message,
 )
 from backend.app.services.intent_service import classify_intent
+from backend.app.services.llm_response_service import rewrite_chat_answer_with_llm
 from backend.app.services.preference_service import extract_preferences
 from backend.app.services.recommendation_service import (
     build_recommendation_answer,
@@ -81,7 +82,14 @@ def chat(request: ChatRequest, db: Session = Depends(get_db)):
     )
     recommended_cars = []
 
-    if intent == "car_recommendation":
+    if intent == "greeting":
+        answer = (
+            "Hey, I'm AutoAdvisor AI. I can help you find a car, compare "
+            "options, check used-car fair price, analyze a car image, or "
+            "prepare a dealer inquiry draft. What are you looking for?"
+        )
+
+    elif intent == "car_recommendation":
         if prefs.listing_type is None:
             answer = build_listing_type_clarification(prefs.budget_max)
         else:
@@ -199,6 +207,14 @@ def chat(request: ChatRequest, db: Session = Depends(get_db)):
 
     else:
         answer = "I can help with car recommendations, comparisons, price checks, image analysis, and dealer inquiries."
+
+    answer = rewrite_chat_answer_with_llm(
+        user_message=request.message,
+        intent=intent,
+        draft_answer=answer,
+        extracted_preferences=prefs,
+        recommended_cars=recommended_cars,
+    )
 
     memory_service.add_message(
 
