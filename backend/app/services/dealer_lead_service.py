@@ -28,6 +28,10 @@ def create_dealer_lead(
 
     lead = DealerLead(
         selected_car_id=car.id,
+        customer_name=request.customer_name,
+        customer_phone=request.customer_phone,
+        customer_email=request.customer_email,
+        notes=request.notes,
         budget=request.budget,
         user_location=request.user_location,
         preferred_contact_method=request.preferred_contact_method,
@@ -42,6 +46,9 @@ def create_dealer_lead(
     return DealerLeadResponse(
         lead_id=lead.id,
         selected_car_id=car.id,
+        customer_name=lead.customer_name,
+        customer_phone=lead.customer_phone,
+        customer_email=lead.customer_email,
         dealership_name=dealership.name if dealership else None,
         dealership_location=dealership.location if dealership else None,
         dealership_phone=dealership.phone if dealership else None,

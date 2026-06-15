@@ -1,4 +1,5 @@
 from datetime import date
+from pathlib import Path
 from typing import Any
 
 import requests
@@ -7,6 +8,7 @@ import streamlit as st
 
 DEFAULT_API_BASE_URL = "http://127.0.0.1:8000"
 REQUEST_TIMEOUT_SECONDS = 30
+LOGO_PATH = Path(__file__).resolve().parent / "assets" / "Logo_AutoAdvisor.png"
 
 
 def normalize_base_url(base_url: str) -> str:
@@ -215,35 +217,62 @@ with st.sidebar:
     st.divider()
     st.info("Demo inventory and AI outputs should be verified before purchase.")
 
+if LOGO_PATH.is_file():
+    try:
+        st.image(str(LOGO_PATH), width="stretch")
+    except OSError:
+        pass
+
 st.title("AutoAdvisor AI")
-st.caption(
-    "A Lebanon/MENA car-buying assistant with AI recommendations, used-car "
-    "price checks, image safety and quality analysis, and dealer inquiry drafts."
+st.markdown("### Smart Advice. Better Drives.")
+st.write(
+    "AI-powered car discovery, fair-price evaluation, image-assisted inspection, "
+    "and dealer inquiry drafts for Lebanon/MENA."
 )
+st.caption("Curated demo inventory. No live scraping. Dealer messages are drafts only.")
+
+st.markdown("## Choose your drive mode")
+gear_columns = st.columns(5)
+gear_modes = [
+    ("D · Drive", "Ask the AI assistant for car recommendations"),
+    ("P · Park", "Explore the curated PostgreSQL inventory"),
+    ("N · Neutral", "Compare cars side by side"),
+    ("R · Reverse", "Check used-car fair price"),
+    ("S · Sport", "Run image-assisted car evaluation"),
+]
+
+for index, (mode, description) in enumerate(gear_modes):
+    with gear_columns[index]:
+        with st.container(border=True):
+            if index == 0:
+                st.info(f"**{mode}**")
+            else:
+                st.markdown(f"**{mode}**")
+            st.caption(description)
 
 (
-    inventory_tab,
     chat_tab,
+    inventory_tab,
     compare_tab,
     price_tab,
     image_tab,
     dealer_tab,
 ) = st.tabs(
     [
-        "Inventory Search",
-        "AI Chat",
-        "Compare Cars",
-        "Used-Car Price Check",
-        "Image Analysis",
-        "Dealer Inquiry",
+        "D · Drive AI Chat",
+        "P · Park Inventory",
+        "N · Neutral Compare",
+        "R · Reverse Price Check",
+        "S · Sport Image Evaluation",
+        "Dealer Draft",
     ]
 )
 
 with inventory_tab:
-    st.subheader("Search New and Used Inventory")
+    st.subheader("P · Park Curated Inventory")
     st.info(
-        "Searches the seeded AutoAdvisor inventory stored in PostgreSQL through "
-        "the FastAPI backend."
+        "This searches the curated AutoAdvisor PostgreSQL demo inventory. "
+        "It is not live scraped marketplace data."
     )
 
     with st.form("inventory_search_form"):
@@ -303,7 +332,11 @@ with inventory_tab:
             show_request_error(exc)
 
 with chat_tab:
-    st.subheader("Ask AutoAdvisor AI")
+    st.subheader("D · Drive AI Chat")
+    st.caption(
+        "This mode combines intent routing, inventory search, chat memory, "
+        "recommendations, and optional OpenAI response polishing."
+    )
 
     if "chat_messages" not in st.session_state:
         st.session_state["chat_messages"] = []
@@ -531,7 +564,7 @@ with price_tab:
             show_request_error(exc)
 
 with image_tab:
-    st.subheader("Analyze a Vehicle Image")
+    st.subheader("S · Sport Image-Assisted Car Evaluation")
     st.info(
         "Upload a vehicle image to check its safety, quality, and usefulness "
         "before continuing with confirmed vehicle details."
@@ -839,8 +872,8 @@ with image_tab:
                         show_request_error(exc)
 
 with dealer_tab:
-    st.subheader("Create a Safe Dealer Inquiry Draft")
-    st.info("This creates a draft/demo lead only. No message is sent automatically.")
+    st.subheader("Dealer Inquiry Draft")
+    st.info("No email, WhatsApp message, or dealer contact is sent automatically.")
 
     with st.form("dealer_inquiry_form"):
         dealer_fields = st.columns(2)
