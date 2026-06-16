@@ -10,11 +10,11 @@ import {
 } from "./api";
 
 const gears = [
-  ["D", "Drive", "AI assistant and recommendations", "drive"],
-  ["P", "Park", "Browse curated inventory", "park"],
-  ["N", "Neutral", "Compare cars", "neutral"],
-  ["R", "Reverse", "Check fair price", "reverse"],
-  ["S", "Save", "Save interest and prepare dealer inquiry drafts", "save"],
+  { letter: "P", name: "Park", label: "Browse Inventory", id: "park" },
+  { letter: "R", name: "Rate", label: "Fair Price Check", id: "reverse" },
+  { letter: "N", name: "Neutral", label: "Compare Cars", id: "neutral" },
+  { letter: "D", name: "Drive", label: "Ask AutoAdvisor AI", id: "drive" },
+  { letter: "S", name: "Save", label: "Save Interest / Dealer Draft", id: "save" },
 ];
 
 const defaultPriceDetails = {
@@ -22,6 +22,7 @@ const defaultPriceDetails = {
   model: "Yaris",
   year: 2018,
   mileage_km: 60000,
+  body_type: "Hatchback",
   fuel_type: "Petrol",
   transmission_type: "Automatic",
   vehicle_age: 8,
@@ -29,10 +30,71 @@ const defaultPriceDetails = {
   mileage: 18,
   max_power: 82,
   seats: 5,
+  budget_max: "",
+};
+
+const emptyConfirmedVehicleDetails = {
+  brand: "",
+  model: "",
+  year: "",
+  mileage_km: "",
+  body_type: "",
+  fuel_type: "Petrol",
+  transmission_type: "Automatic",
+  vehicle_age: "",
+  engine: "",
+  mileage: "",
+  max_power: "",
+  seats: "",
+  budget_max: "",
 };
 
 function scrollTo(id) {
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+}
+
+function GearboxSelector({ activeGear, onSelectGear, floating = false }) {
+  const activeGearIndex = Math.max(
+    0,
+    gears.findIndex((gear) => gear.letter === activeGear),
+  );
+
+  return (
+    <div
+      className={`gearbox-shell ${floating ? "floating" : ""}`}
+      style={{
+        "--gear-y": `${activeGearIndex * 61.68}px`,
+        "--gear-y-floating": `${activeGearIndex * 47.6}px`,
+        "--gear-path": `${activeGearIndex * 61.68 + 28}px`,
+        "--gear-path-floating": `${activeGearIndex * 47.6 + 22}px`,
+      }}
+      aria-label="PRNDS navigation selector"
+    >
+      <div className="gearbox-plate">
+        <div className="gearbox-slot" />
+        <div className="gearbox-gate" />
+        <div className="gearbox-active-path" aria-hidden="true" />
+        <div className="gearbox-label">PRNDS</div>
+        <div className="gearbox-options">
+          <span className="gearbox-knob" aria-hidden="true" />
+          {gears.map((gear) => (
+            <button
+              key={gear.letter}
+              className={activeGear === gear.letter ? "active" : ""}
+              onClick={() => onSelectGear(gear)}
+              aria-label={`${gear.letter} ${gear.name}: ${gear.label}`}
+            >
+              <span className="gear-letter">{gear.letter}</span>
+              <span className="gear-text">
+                <strong>{gear.name}</strong>
+                <small>{gear.label}</small>
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function LoadingButton({ loading, children, ...props }) {
@@ -46,6 +108,27 @@ function LoadingButton({ loading, children, ...props }) {
 function Notice({ error, children, type = "info" }) {
   if (!error && !children) return null;
   return <div className={`notice ${error ? "error" : type}`}>{error || children}</div>;
+}
+
+function titleCase(value) {
+  if (!value) return "Unknown";
+  return String(value)
+    .replace(/_/g, " ")
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+}
+
+function uniqueSortedValues(cars, key) {
+  return [...new Set(cars.map((car) => car[key]).filter(Boolean))].sort((a, b) =>
+    String(a).localeCompare(String(b)),
+  );
+}
+
+function compareKeyFor(item) {
+  if (item.compareKey) return item.compareKey;
+  if (item.kind === "uploaded_profile") return `uploaded-${item.profileKey}`;
+  return `inventory-${item.id}`;
 }
 
 function SaveInterestForm({
@@ -142,7 +225,15 @@ function SaveInterestForm({
   );
 }
 
-function CarCard({ car }) {
+function CarCard({ car, compareSelection = [], onAddCompare }) {
+  const status = String(car.availability_status || "unknown").toLowerCase();
+  const isSold = status === "sold";
+  const carCompareKey = compareKeyFor(car);
+  const isSelectedForCompare = compareSelection.some(
+    (item) => compareKeyFor(item) === carCompareKey,
+  );
+  const compareSelectionFull = compareSelection.length >= 5 && !isSelectedForCompare;
+
   return (
     <article className="car-card">
       {car.image_url && (
@@ -155,8 +246,10 @@ function CarCard({ car }) {
         />
       )}
       <div className="car-card-body">
-        <div className="eyebrow">
-          #{car.id} · {car.listing_type || "listing"} · {car.availability_status || "unknown"}
+        <div className="car-card-meta">
+          <span>Car ID: {car.id}</span>
+          <span>Listing: {titleCase(car.listing_type || "listing")}</span>
+          <span className={`status-badge ${status}`}>Status: {titleCase(status)}</span>
         </div>
         <h3>
           {car.year} {car.make} {car.model} {car.trim || ""}
@@ -173,22 +266,81 @@ function CarCard({ car }) {
           {car.body_type} · {car.fuel} · {car.transmission}
         </p>
         <small>{car.region}</small>
+        {isSold && (
+          <p className="sold-interest-note">
+            This car is marked sold. You can still save interest for similar alternatives.
+          </p>
+        )}
+        {onAddCompare && (
+          <button
+            className="compare-card-button"
+            disabled={isSelectedForCompare || compareSelectionFull}
+            onClick={() => onAddCompare(car)}
+          >
+            {isSelectedForCompare
+              ? "Added to Compare"
+              : compareSelectionFull
+                ? "Compare list full"
+                : "Add to Compare"}
+          </button>
+        )}
         <SaveInterestForm carId={car.id} defaultBudget={car.price_usd || ""} />
       </div>
     </article>
   );
 }
 
-function CarGrid({ cars, empty = "No cars to display." }) {
+function CarGrid({
+  cars,
+  empty = "No cars to display.",
+  compareSelection = [],
+  onAddCompare,
+  pageSize = 6,
+}) {
+  const [visibleCount, setVisibleCount] = useState(pageSize);
+  useEffect(() => {
+    setVisibleCount(pageSize);
+  }, [cars, pageSize]);
+
   if (!cars?.length) return <p className="muted">{empty}</p>;
+
+  const visibleCars = cars.slice(0, visibleCount);
+  const canShowMore = visibleCount < cars.length;
+  const canResetView = visibleCount > pageSize;
+
   return (
     <>
       <p className="representative-note">
         Images are representative demo visuals, not verified listing photos.
       </p>
+      <div className="car-grid-controls">
+        <span>
+          Showing {Math.min(visibleCount, cars.length)} of {cars.length} cars
+        </span>
+        <div>
+          {canShowMore && (
+            <button
+              className="secondary"
+              onClick={() => setVisibleCount((count) => Math.min(count + pageSize, cars.length))}
+            >
+              Show more
+            </button>
+          )}
+          {canResetView && (
+            <button className="secondary" onClick={() => setVisibleCount(pageSize)}>
+              Reset view
+            </button>
+          )}
+        </div>
+      </div>
       <div className="car-grid">
-        {cars.map((car) => (
-          <CarCard key={car.id} car={car} />
+        {visibleCars.map((car) => (
+          <CarCard
+            key={car.id}
+            car={car}
+            compareSelection={compareSelection}
+            onAddCompare={onAddCompare}
+          />
         ))}
       </div>
     </>
@@ -216,7 +368,7 @@ function Field({ label, children }) {
   );
 }
 
-function PriceFields({ details, setDetails }) {
+function PriceFields({ details, setDetails, includeProfileFields = false }) {
   const update = (key, value) => setDetails((current) => ({ ...current, [key]: value }));
   return (
     <div className="form-grid">
@@ -224,6 +376,13 @@ function PriceFields({ details, setDetails }) {
       <Field label="Model"><input value={details.model} onChange={(e) => update("model", e.target.value)} /></Field>
       <Field label="Year"><input type="number" value={details.year} onChange={(e) => update("year", e.target.value)} /></Field>
       <Field label="Mileage (km)"><input type="number" value={details.mileage_km} onChange={(e) => update("mileage_km", e.target.value)} /></Field>
+      {includeProfileFields && (
+        <Field label="Body type">
+          <select value={details.body_type} onChange={(e) => update("body_type", e.target.value)}>
+            {["", "Sedan", "SUV", "Hatchback", "Coupe", "Pickup", "Van"].map((item) => <option key={item} value={item}>{item || "Select body type"}</option>)}
+          </select>
+        </Field>
+      )}
       <Field label="Fuel type">
         <select value={details.fuel_type} onChange={(e) => update("fuel_type", e.target.value)}>
           {["Petrol", "Diesel", "CNG", "LPG", "Electric"].map((item) => <option key={item}>{item}</option>)}
@@ -239,6 +398,9 @@ function PriceFields({ details, setDetails }) {
       <Field label="Fuel economy"><input type="number" step="0.1" value={details.mileage} onChange={(e) => update("mileage", e.target.value)} /></Field>
       <Field label="Max power"><input type="number" value={details.max_power} onChange={(e) => update("max_power", e.target.value)} /></Field>
       <Field label="Seats"><input type="number" value={details.seats} onChange={(e) => update("seats", e.target.value)} /></Field>
+      {includeProfileFields && (
+        <Field label="Budget"><input type="number" value={details.budget_max} onChange={(e) => update("budget_max", e.target.value)} placeholder="Optional" /></Field>
+      )}
     </div>
   );
 }
@@ -276,12 +438,11 @@ function PriceResult({ result, details }) {
         <span>{label}</span>
       </div>
       <p className="warning-text">{result.disclaimer}</p>
-      <details><summary>Technical price model details</summary><pre>{JSON.stringify(result, null, 2)}</pre></details>
     </div>
   );
 }
 
-function DriveSection() {
+function DriveSection({ compareSelection, onAddCompare }) {
   const examples = [
     "I need a reliable used SUV under $15,000 in Beirut",
     "Compare Toyota Corolla and Kia Picanto",
@@ -313,7 +474,7 @@ function DriveSection() {
 
   return (
     <section id="drive">
-      <SectionHeader gear="D" title="Drive" description="Ask the AI car-buying assistant" />
+      <SectionHeader gear="D" title="Drive" description="Ask AutoAdvisor AI" />
       <p className="section-copy">Intent routing, inventory search, chat memory, recommendations, and optional OpenAI response polishing.</p>
       <div className="prompt-row">{examples.map((item) => <button className="prompt-chip" key={item} onClick={() => send(item)}>{item}</button>)}</div>
       <div className="chat-shell">
@@ -321,8 +482,13 @@ function DriveSection() {
           {messages.map((message, index) => (
             <div className={`message ${message.role}`} key={`${message.role}-${index}`}>
               <div className="message-bubble">{message.content}</div>
-              {message.meta?.recommended_cars?.length > 0 && <CarGrid cars={message.meta.recommended_cars} />}
-              {message.meta && <details><summary>Debug details</summary><pre>{JSON.stringify({ intent: message.meta.intent, extracted_preferences: message.meta.extracted_preferences }, null, 2)}</pre></details>}
+              {message.meta?.recommended_cars?.length > 0 && (
+                <CarGrid
+                  cars={message.meta.recommended_cars}
+                  compareSelection={compareSelection}
+                  onAddCompare={onAddCompare}
+                />
+              )}
             </div>
           ))}
           {loading && <div className="message assistant"><div className="message-bubble">Reviewing your request…</div></div>}
@@ -337,70 +503,252 @@ function DriveSection() {
   );
 }
 
-function ParkSection() {
-  const [filters, setFilters] = useState({ listing_type: "Any", budget_max: "", make: "", body_type: "Any", fuel: "Any", transmission: "Any", region: "" });
+function ParkSection({ compareSelection, onAddCompare }) {
+  const [filters, setFilters] = useState({
+    listing_type: "Any",
+    budget_max: "",
+    make: "Any make",
+    body_type: "Any body type",
+    fuel: "Any fuel",
+    transmission: "Any transmission",
+    region: "Any region",
+    available_only: true,
+  });
+  const [allInventory, setAllInventory] = useState([]);
   const [cars, setCars] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const update = (key, value) => setFilters((current) => ({ ...current, [key]: value }));
 
-  async function load(path, params = {}) {
+  const makeOptions = ["Any make", ...uniqueSortedValues(allInventory, "make")];
+  const bodyTypeOptions = ["Any body type", ...uniqueSortedValues(allInventory, "body_type")];
+  const fuelOptions = ["Any fuel", ...uniqueSortedValues(allInventory, "fuel")];
+  const transmissionOptions = [
+    "Any transmission",
+    ...uniqueSortedValues(allInventory, "transmission"),
+  ];
+  const regionOptions = ["Any region", ...uniqueSortedValues(allInventory, "region")];
+
+  function availableFiltered(items) {
+    if (!filters.available_only) return items;
+    return items.filter((car) => car.availability_status === "available");
+  }
+
+  function inventoryResults(payload) {
+    return Array.isArray(payload) ? payload : payload.results || [];
+  }
+
+  function searchParams() {
+    return {
+      listing_type: filters.listing_type === "Any" ? undefined : filters.listing_type,
+      budget_max: filters.budget_max || undefined,
+      make: filters.make === "Any make" ? undefined : filters.make,
+      body_type: filters.body_type === "Any body type" ? undefined : filters.body_type,
+      fuel: filters.fuel === "Any fuel" ? undefined : filters.fuel,
+      transmission:
+        filters.transmission === "Any transmission" ? undefined : filters.transmission,
+      region: filters.region === "Any region" ? undefined : filters.region,
+      availability_status: filters.available_only ? "available" : undefined,
+    };
+  }
+
+  async function loadAllInventory(showResults = false) {
     setLoading(true); setError("");
     try {
-      const result = await apiGet(path, params);
-      setCars(Array.isArray(result) ? result : result.results || []);
+      const result = await apiGet("/cars");
+      const inventory = inventoryResults(result);
+      setAllInventory(inventory);
+      if (showResults) setCars(availableFiltered(inventory));
+      if (!cars.length) setCars(availableFiltered(inventory));
+    } catch (requestError) { setError(requestError.message); }
+    finally { setLoading(false); }
+  }
+
+  useEffect(() => {
+    loadAllInventory(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function searchInventory() {
+    setLoading(true); setError("");
+    try {
+      const result = await apiGet("/search/cars", searchParams());
+      setCars(availableFiltered(inventoryResults(result)));
     } catch (requestError) { setError(requestError.message); }
     finally { setLoading(false); }
   }
 
   return (
     <section id="park">
-      <SectionHeader gear="P" title="Park" description="Explore the AutoAdvisor inventory" />
+      <SectionHeader gear="P" title="Park" description="Browse Inventory" />
       <p className="section-copy">This is curated demo inventory, not live scraped marketplace data.</p>
       <div className="panel">
         <div className="form-grid compact">
           <Field label="Listing type"><select value={filters.listing_type} onChange={(e) => update("listing_type", e.target.value)}>{["Any", "used", "new"].map((v) => <option key={v}>{v}</option>)}</select></Field>
           <Field label="Budget max"><input type="number" value={filters.budget_max} onChange={(e) => update("budget_max", e.target.value)} placeholder="Optional" /></Field>
-          <Field label="Make"><input value={filters.make} onChange={(e) => update("make", e.target.value)} placeholder="Optional" /></Field>
-          <Field label="Body type"><select value={filters.body_type} onChange={(e) => update("body_type", e.target.value)}>{["Any", "Sedan", "SUV", "Hatchback", "Coupe", "Pickup", "Van"].map((v) => <option key={v}>{v}</option>)}</select></Field>
-          <Field label="Fuel"><select value={filters.fuel} onChange={(e) => update("fuel", e.target.value)}>{["Any", "Petrol", "Hybrid", "Diesel", "Electric"].map((v) => <option key={v}>{v}</option>)}</select></Field>
-          <Field label="Transmission"><select value={filters.transmission} onChange={(e) => update("transmission", e.target.value)}>{["Any", "Automatic", "Manual"].map((v) => <option key={v}>{v}</option>)}</select></Field>
-          <Field label="Region"><input value={filters.region} onChange={(e) => update("region", e.target.value)} placeholder="Optional" /></Field>
+          <Field label="Make"><select value={filters.make} onChange={(e) => update("make", e.target.value)}>{makeOptions.map((v) => <option key={v}>{v}</option>)}</select></Field>
+          <Field label="Body type"><select value={filters.body_type} onChange={(e) => update("body_type", e.target.value)}>{bodyTypeOptions.map((v) => <option key={v}>{v}</option>)}</select></Field>
+          <Field label="Fuel"><select value={filters.fuel} onChange={(e) => update("fuel", e.target.value)}>{fuelOptions.map((v) => <option key={v}>{v}</option>)}</select></Field>
+          <Field label="Transmission"><select value={filters.transmission} onChange={(e) => update("transmission", e.target.value)}>{transmissionOptions.map((v) => <option key={v}>{v}</option>)}</select></Field>
+          <Field label="Region"><select value={filters.region} onChange={(e) => update("region", e.target.value)}>{regionOptions.map((v) => <option key={v}>{v}</option>)}</select></Field>
+          <label className="checkbox-field">
+            <input type="checkbox" checked={filters.available_only} onChange={(e) => update("available_only", e.target.checked)} />
+            <span>Available only</span>
+            <small>Turn off to include reserved and sold cars.</small>
+          </label>
         </div>
         <div className="button-row">
-          <LoadingButton loading={loading} onClick={() => load("/search/cars", filters)}>Search inventory</LoadingButton>
-          <LoadingButton loading={loading} className="secondary" onClick={() => load("/cars")}>Show all inventory</LoadingButton>
+          <LoadingButton loading={loading} onClick={searchInventory}>Search inventory</LoadingButton>
+          <LoadingButton loading={loading} className="secondary" onClick={() => loadAllInventory(true)}>Show all inventory</LoadingButton>
         </div>
         <Notice error={error}>{cars.length ? `Showing ${cars.length} cars.` : ""}</Notice>
       </div>
-      <CarGrid cars={cars} empty="Search or show all inventory to begin." />
+      <CarGrid
+        cars={cars}
+        empty="Search or show all inventory to begin."
+        compareSelection={compareSelection}
+        onAddCompare={onAddCompare}
+      />
     </section>
   );
 }
 
-function NeutralSection() {
+function NeutralSection({ compareSelection, onRemoveCompare }) {
   const [ids, setIds] = useState("1, 2");
   const [result, setResult] = useState(null);
+  const [selectedProfiles, setSelectedProfiles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  async function submit() {
+  const [notice, setNotice] = useState("");
+
+  useEffect(() => {
+    setSelectedProfiles((current) =>
+      current
+        .map((profile) =>
+          compareSelection.find((item) => compareKeyFor(item) === compareKeyFor(profile)),
+        )
+        .filter(Boolean),
+    );
+  }, [compareSelection]);
+
+  async function compareSelected() {
+    const inventoryCars = compareSelection.filter((item) => item.kind !== "uploaded_profile" && item.id);
+    const uploadedProfiles = compareSelection.filter((item) => item.kind === "uploaded_profile");
+    const carIds = inventoryCars.map((car) => car.id);
+
+    if (compareSelection.length < 2) {
+      setError("Select at least 2 cars to compare.");
+      return;
+    }
+    setSelectedProfiles(uploadedProfiles);
+    setNotice("");
+    setError("");
+
+    if (carIds.length < 2) {
+      setResult(null);
+      setNotice(
+        "Inventory cars are compared through AutoAdvisor inventory. Uploaded profiles are displayed for side-by-side review.",
+      );
+      return;
+    }
+
+    setLoading(true);
+    try {
+      setResult(await compareCars(carIds));
+      if (uploadedProfiles.length) {
+        setNotice(
+          "Inventory cars are compared through AutoAdvisor inventory. Uploaded profiles are displayed for side-by-side review.",
+        );
+      }
+    } catch (requestError) { setError(`Could not compare selected cars: ${requestError.message}`); }
+    finally { setLoading(false); }
+  }
+  async function submitManual() {
     const carIds = ids.split(",").map((id) => Number(id.trim())).filter(Number.isInteger);
-    setLoading(true); setError("");
-    try { setResult(await compareCars(carIds)); } catch (requestError) { setError(requestError.message); }
+    if (carIds.length < 2) {
+      setError("Enter at least 2 car IDs to compare.");
+      return;
+    }
+    setLoading(true); setError(""); setNotice(""); setSelectedProfiles([]);
+    try { setResult(await compareCars(carIds)); } catch (requestError) { setError(`Could not compare those car IDs: ${requestError.message}`); }
     finally { setLoading(false); }
   }
   return (
     <section id="neutral">
-      <SectionHeader gear="N" title="Neutral" description="Compare 2 to 5 inventory cars" />
+      <SectionHeader gear="N" title="Neutral" description="Compare Cars" />
+      <p className="section-copy">
+        Compare cars selected from AI recommendations, inventory results, or image-assisted similar matches.
+      </p>
+      <div className="panel compare-selection-panel">
+        <div className="compare-selection-header">
+          <div>
+            <h3>Selected for comparison</h3>
+            <p className="muted">Choose 2 to 5 cars from any car card.</p>
+          </div>
+          <LoadingButton
+            loading={loading}
+            disabled={compareSelection.length < 2}
+            onClick={compareSelected}
+          >
+            Compare selected cars
+          </LoadingButton>
+        </div>
+        {compareSelection.length ? (
+          <div className="compare-chip-row">
+            {compareSelection.map((item) => (
+              <div className={`compare-chip ${item.kind === "uploaded_profile" ? "profile" : ""}`} key={compareKeyFor(item)}>
+                <strong>{item.year || "Year"} {item.make || item.brand} {item.model}</strong>
+                <span>
+                  {item.kind === "uploaded_profile"
+                    ? "Confirmed image profile"
+                    : `Car ID: ${item.id}`}
+                </span>
+                <button onClick={() => onRemoveCompare(compareKeyFor(item))}>Remove</button>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="muted">No cars selected yet.</p>
+        )}
+      </div>
       <div className="panel inline-panel">
-        <Field label="Comma-separated car IDs"><input value={ids} onChange={(e) => setIds(e.target.value)} /></Field>
-        <LoadingButton loading={loading} onClick={submit}>Compare cars</LoadingButton>
+        <Field label="Advanced: comma-separated car IDs"><input value={ids} onChange={(e) => setIds(e.target.value)} /></Field>
+        <LoadingButton loading={loading} onClick={submitManual}>Compare manual IDs</LoadingButton>
       </div>
       <Notice error={error} />
+      <Notice type="info">{notice}</Notice>
       {result && <>
         <div className="assistant-card"><span className="assistant-label">Verdict</span><p>{result.final_verdict}</p></div>
         <div className="comparison-grid">{result.cars.map((car) => <article className="comparison-card" key={car.id}><h3>{car.title}</h3><p>${Number(car.price_usd).toLocaleString()} · {car.mileage_km?.toLocaleString() || 0} km</p><p>{car.body_type} · {car.fuel} · {car.transmission}</p><h4>Strengths</h4><ul>{car.strengths.map((item) => <li key={item}>{item}</li>)}</ul><h4>Risks</h4><ul>{car.risks.map((item) => <li key={item}>{item}</li>)}</ul><p><strong>Best use:</strong> {car.best_use_case}</p></article>)}</div>
       </>}
+      {selectedProfiles.length > 0 && (
+        <div className="uploaded-profile-block">
+          <p className="section-copy">
+            Uploaded profiles are user-confirmed details from image-assisted evaluation. They are not inventory listings.
+          </p>
+          <div className="comparison-grid">
+            {selectedProfiles.map((profile) => (
+              <article className="comparison-card uploaded-profile-card" key={compareKeyFor(profile)}>
+                <span className="assistant-label">Uploaded profile</span>
+                <h3>{profile.year || "Year"} {profile.make || "Make"} {profile.model || "Model"}</h3>
+                <p>
+                  {profile.mileage_km ? `${Number(profile.mileage_km).toLocaleString()} km` : "Mileage not confirmed"}
+                </p>
+                <p>{profile.body_type || "Body type not confirmed"} · {profile.fuel || "Fuel not confirmed"} · {profile.transmission || "Transmission not confirmed"}</p>
+                {profile.estimated_price_usd && (
+                  <p>
+                    Estimated fair price: <strong>${Number(profile.estimated_price_usd).toLocaleString()}</strong>
+                    {profile.low_estimate_usd && profile.high_estimate_usd
+                      ? ` (${Number(profile.low_estimate_usd).toLocaleString()} to ${Number(profile.high_estimate_usd).toLocaleString()})`
+                      : ""}
+                  </p>
+                )}
+                <p className="muted">User-confirmed profile, not an inventory listing.</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      )}
     </section>
   );
 }
@@ -417,23 +765,39 @@ function ReverseSection() {
   }
   return (
     <section id="reverse">
-      <SectionHeader gear="R" title="Reverse" description="Check a used-car fair price" />
+      <SectionHeader gear="R" title="Rate" description="Fair Price Check" />
       <div className="panel"><PriceFields details={details} setDetails={setDetails} /><LoadingButton loading={loading} onClick={submit}>Estimate fair price</LoadingButton><Notice error={error} /></div>
       <PriceResult result={result} details={details} />
     </section>
   );
 }
 
-function ImageEvaluationSection() {
+function ImageEvaluationSection({ compareSelection, onAddCompare }) {
   const [file, setFile] = useState(null);
   const [analysis, setAnalysis] = useState(null);
-  const [details, setDetails] = useState(defaultPriceDetails);
+  const [details, setDetails] = useState(emptyConfirmedVehicleDetails);
   const [priceResult, setPriceResult] = useState(null);
   const [similar, setSimilar] = useState(null);
   const [loading, setLoading] = useState("");
   const [error, setError] = useState("");
+  const [profileNotice, setProfileNotice] = useState("");
   const preview = useMemo(() => file ? URL.createObjectURL(file) : "", [file]);
   useEffect(() => () => { if (preview) URL.revokeObjectURL(preview); }, [preview]);
+
+  function resetConfirmedDetails() {
+    setDetails(emptyConfirmedVehicleDetails);
+    setPriceResult(null);
+    setSimilar(null);
+    setProfileNotice("");
+  }
+
+  function handleFileChange(event) {
+    const nextFile = event.target.files?.[0] || null;
+    setFile(nextFile);
+    setAnalysis(null);
+    setError("");
+    resetConfirmedDetails();
+  }
 
   async function analyze() {
     if (!file) return;
@@ -451,12 +815,44 @@ function ImageEvaluationSection() {
     try {
       setSimilar(await apiPost("/image/similar-cars", {
         make: details.brand, model: details.model, year: Number(details.year),
-        mileage_km: Number(details.mileage_km), fuel: details.fuel_type,
-        transmission: details.transmission_type, listing_type: "used",
+        mileage_km: Number(details.mileage_km), body_type: details.body_type,
+        fuel: details.fuel_type, transmission: details.transmission_type,
+        budget_max: details.budget_max ? Number(details.budget_max) : undefined,
+        listing_type: "used",
       }));
     } catch (requestError) { setError(requestError.message); }
     finally { setLoading(""); }
   }
+  function addUploadedProfileToCompare() {
+    const profileKey = file
+      ? `${file.name}-${file.size}-${file.lastModified}`
+      : `manual-${Date.now()}`;
+    const profile = {
+      kind: "uploaded_profile",
+      compareKey: `uploaded-${profileKey}`,
+      profileKey,
+      make: details.brand,
+      model: details.model,
+      year: details.year,
+      mileage_km: details.mileage_km,
+      body_type: details.body_type,
+      fuel: details.fuel_type,
+      transmission: details.transmission_type,
+      budget_max: details.budget_max,
+      estimated_price_usd: priceResult?.estimated_price_usd,
+      low_estimate_usd: priceResult?.low_estimate_usd,
+      high_estimate_usd: priceResult?.high_estimate_usd,
+    };
+    onAddCompare(profile);
+    setProfileNotice("Confirmed image profile added to comparison.");
+  }
+
+  const uploadedProfileKey = file
+    ? `uploaded-${file.name}-${file.size}-${file.lastModified}`
+    : "";
+  const uploadedProfileAlreadySelected = uploadedProfileKey
+    ? compareSelection.some((item) => compareKeyFor(item) === uploadedProfileKey)
+    : false;
 
   return (
     <section id="image-evaluation">
@@ -464,15 +860,15 @@ function ImageEvaluationSection() {
       <p className="section-copy">The image is used for safety, quality, and context. It does not identify an exact vehicle or predict price alone.</p>
       <div className="image-evaluation-grid">
         <div className="panel upload-panel">
-          <Field label="Vehicle image"><input type="file" accept=".jpg,.jpeg,.png,.webp" onChange={(e) => { setFile(e.target.files?.[0]); setAnalysis(null); }} /></Field>
+          <Field label="Vehicle image"><input type="file" accept=".jpg,.jpeg,.png,.webp" onChange={handleFileChange} /></Field>
           {preview && <img className="preview" src={preview} alt="Uploaded vehicle preview" />}
           <LoadingButton loading={loading === "analysis"} disabled={!file} onClick={analyze}>Analyze image</LoadingButton>
         </div>
-        {analysis && <div className="assistant-card"><span className="assistant-label">Image evaluation</span><h3>{analysis.message}</h3><p>Safety: {analysis.safe_image ? "Passed" : "Rejected"} · Accepted: {analysis.accepted_for_analysis ? "Yes" : "No"}</p><p>Quality: {analysis.quality_status || "Unavailable"} · Vehicle visibility: {analysis.vehicle_visibility_status || "Unavailable"}</p><p>Dominant color: {analysis.dominant_color || "Unknown"} · Estimated body type: {analysis.estimated_body_type || "Unknown"}</p>{analysis.warnings?.length > 0 && <Notice type="warning">{analysis.warnings.join(" · ")}</Notice>}<details><summary>Technical image analysis details</summary><pre>{JSON.stringify(analysis, null, 2)}</pre></details></div>}
+        {analysis && <div className="assistant-card"><span className="assistant-label">Image evaluation</span><h3>{analysis.message}</h3><p>Safety: {analysis.safe_image ? "Passed" : "Rejected"} · Accepted: {analysis.accepted_for_analysis ? "Yes" : "No"}</p><p>Quality: {analysis.quality_status || "Unavailable"} · Vehicle visibility: {analysis.vehicle_visibility_status || "Unavailable"}</p><p>Dominant color: {analysis.dominant_color || "Unknown"} · Estimated body type: {analysis.estimated_body_type || "Unknown"}</p>{analysis.warnings?.length > 0 && <Notice type="warning">{analysis.warnings.join(" · ")}</Notice>}</div>}
       </div>
-      {analysis?.accepted_for_analysis && <div className="panel confirm-panel"><h3>Continue with confirmed vehicle details</h3><p className="warning-text">AutoAdvisor does not estimate price from image alone. The image is used for safety/quality/context; the price estimate uses confirmed structured details.</p><PriceFields details={details} setDetails={setDetails} /><div className="button-row"><LoadingButton loading={loading === "price"} onClick={estimate}>Estimate fair price from confirmed details</LoadingButton><LoadingButton loading={loading === "similar"} className="secondary" onClick={findSimilar}>Find similar cars in inventory</LoadingButton></div><Notice error={error} /></div>}
+      {analysis?.accepted_for_analysis && <div className="panel confirm-panel"><h3>Continue with confirmed vehicle details</h3><p className="warning-text">AutoAdvisor does not identify exact make/model from image alone. Please confirm the vehicle details.</p><p className="warning-text">AutoAdvisor does not estimate price from image alone. The image is used for safety/quality/context; the price estimate uses confirmed structured details.</p><PriceFields details={details} setDetails={setDetails} includeProfileFields /><div className="button-row"><button className="secondary" onClick={resetConfirmedDetails}>Clear confirmed details</button><LoadingButton loading={loading === "price"} onClick={estimate}>Estimate fair price from confirmed details</LoadingButton><LoadingButton loading={loading === "similar"} className="secondary" onClick={findSimilar}>Find similar cars in inventory</LoadingButton><button onClick={addUploadedProfileToCompare}>{uploadedProfileAlreadySelected ? "Update uploaded profile in compare" : "Add uploaded car profile to compare"}</button></div><Notice type="info">{profileNotice}</Notice><Notice error={error} /></div>}
       <PriceResult result={priceResult} details={details} />
-      {similar && <><div className="assistant-card"><span className="assistant-label">Inventory match</span><p>Similar cars are matched from the AutoAdvisor inventory using confirmed details, not from image recognition alone.</p><p>{similar.explanation?.includes("Exact matches were limited") ? "Exact matches were limited, so these results include the closest available alternatives from the curated demo inventory." : "These are the closest available matches from the curated demo inventory."}</p></div><CarGrid cars={similar.similar_cars} /></>}
+      {similar && <><div className="assistant-card"><span className="assistant-label">Inventory match</span><p>Similar cars are matched from the AutoAdvisor inventory using confirmed details, not from image recognition alone.</p><p>{similar.explanation?.includes("Exact matches were limited") ? "Exact matches were limited, so these results include the closest available alternatives from the curated demo inventory." : "These are the closest available matches from the curated demo inventory."}</p></div><CarGrid cars={similar.similar_cars} compareSelection={compareSelection} onAddCompare={onAddCompare} /></>}
     </section>
   );
 }
@@ -480,7 +876,7 @@ function ImageEvaluationSection() {
 function DealerSection() {
   return (
     <section id="save">
-      <SectionHeader gear="S" title="Save Interest / Dealer Draft" description="Save buyer interest and prepare a dealer inquiry draft" />
+      <SectionHeader gear="S" title="Save" description="Save Interest / Dealer Draft" />
       <p className="section-copy">This saves a buyer interest draft. No email, WhatsApp, or dealer contact is sent automatically.</p>
       <div className="panel">
         <SaveInterestForm allowCarId initiallyOpen />
@@ -491,26 +887,84 @@ function DealerSection() {
 
 export default function App() {
   const [backendOnline, setBackendOnline] = useState(null);
+  const [compareSelection, setCompareSelection] = useState([]);
+  const [activeGear, setActiveGear] = useState("D");
+
   useEffect(() => {
     apiGet("/health").then(() => setBackendOnline(true)).catch(() => setBackendOnline(false));
   }, []);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visibleEntries = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+
+        if (visibleEntries[0]) {
+          const matchingGear = gears.find((gear) => gear.id === visibleEntries[0].target.id);
+          if (matchingGear) setActiveGear(matchingGear.letter);
+        }
+      },
+      {
+        rootMargin: "-35% 0px -45% 0px",
+        threshold: [0.12, 0.3, 0.55],
+      },
+    );
+
+    gears.forEach((gear) => {
+      const section = document.getElementById(gear.id);
+      if (section) observer.observe(section);
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  function selectGear(gear) {
+    setActiveGear(gear.letter);
+    scrollTo(gear.id);
+  }
+
+  function addToCompare(car) {
+    setCompareSelection((current) => {
+      const nextKey = compareKeyFor(car);
+      const existingIndex = current.findIndex((item) => compareKeyFor(item) === nextKey);
+
+      if (existingIndex >= 0 && car.kind === "uploaded_profile") {
+        return current.map((item, index) => (index === existingIndex ? car : item));
+      }
+
+      if (existingIndex >= 0 || current.length >= 5) {
+        return current;
+      }
+      return [...current, car];
+    });
+  }
+
+  function removeFromCompare(compareKey) {
+    setCompareSelection((current) => current.filter((car) => compareKeyFor(car) !== compareKey));
+  }
 
   return (
     <>
       <nav>
         <button className="brand" onClick={() => scrollTo("top")}><img src={logo} alt="AutoAdvisor AI" /><span>AutoAdvisor AI</span></button>
-        <div className="nav-links">{gears.map(([letter, name, , id]) => <button key={id} onClick={() => scrollTo(id)}>{letter} · {name}</button>)}</div>
         <span className={`status ${backendOnline ? "online" : backendOnline === false ? "offline" : ""}`}>{backendOnline ? "Backend online" : backendOnline === false ? "Backend offline" : "Checking backend"}</span>
       </nav>
+      <GearboxSelector activeGear={activeGear} onSelectGear={selectGear} floating />
       <main>
         <header id="top" className="hero">
-          <div className="hero-copy"><p className="eyebrow">Lebanon / MENA car-buying intelligence</p><h1>AutoAdvisor AI</h1><h2>Smart Advice. Better Drives.</h2><p>AI-powered car discovery, fair-price evaluation, image-assisted inspection, and dealer inquiry drafts for Lebanon/MENA.</p><div className="button-row"><button onClick={() => scrollTo("drive")}>Start in Drive</button><button className="secondary" onClick={() => scrollTo("park")}>Explore Inventory</button></div><div className="trust-row">{["120-car curated demo inventory", "Optional OpenAI response layer", "No live scraping", "Dealer messages are drafts only"].map((item) => <span key={item}>{item}</span>)}</div></div>
-          <div className="hero-visual"><div className="shifter"><span>P</span><span>R</span><span>N</span><strong>D</strong><span>S</span></div><div className="glow" /></div>
+          <div className="hero-copy"><p className="eyebrow">Lebanon / MENA car-buying intelligence</p><h1>AutoAdvisor AI</h1><h2>Smart Advice. Better Drives.</h2><p>AI-powered car discovery, fair-price evaluation, image-assisted inspection, and dealer inquiry drafts for Lebanon/MENA.</p><div className="button-row"><button onClick={() => scrollTo("drive")}>Start in Drive</button><button className="secondary" onClick={() => scrollTo("park")}>Explore Inventory</button></div></div>
+          <div className="hero-visual"><GearboxSelector activeGear={activeGear} onSelectGear={selectGear} /><div className="glow" /></div>
         </header>
-        <section className="gear-selector"><p className="eyebrow">Choose your drive mode</p><div className="gear-track">{gears.map(([letter, name, description, id]) => <button className={letter === "D" ? "active" : ""} key={id} onClick={() => scrollTo(id)}><span>{letter}</span><strong>{name}</strong><small>{description}</small></button>)}</div></section>
-        <DriveSection /><ParkSection /><NeutralSection /><ReverseSection /><ImageEvaluationSection /><DealerSection />
+        <DriveSection compareSelection={compareSelection} onAddCompare={addToCompare} />
+        <ParkSection compareSelection={compareSelection} onAddCompare={addToCompare} />
+        <NeutralSection compareSelection={compareSelection} onRemoveCompare={removeFromCompare} />
+        <ReverseSection />
+        <ImageEvaluationSection compareSelection={compareSelection} onAddCompare={addToCompare} />
+        <DealerSection />
       </main>
-      <footer><img src={logo} alt="" /><p>AutoAdvisor AI · Curated demo inventory · Backend: {BACKEND_LABEL}</p></footer>
+      <footer><img src={logo} alt="" /><p>AutoAdvisor AI by Mohamad Nasser</p></footer>
     </>
   );
 }
