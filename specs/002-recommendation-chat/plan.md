@@ -1,44 +1,47 @@
 # Plan - Recommendation Chat
 
-## Existing Request Flow
+## Current Request Flow
 
-`POST /chat` -> rule-based intent -> preference extraction -> inventory query ->
-fit scoring -> text answer + Pydantic car responses.
+`POST /chat` -> text guardrails -> greeting/shopping overrides -> ML intent
+classifier with rule fallback -> preference extraction -> workflow service
+selection -> draft answer -> optional LLM response polishing -> memory storage
+and `ChatResponse`.
 
 ## Implementation Approach
 
-1. Add a compact scenario test set before changing recommendation behavior.
-2. Harden preference extraction for budgets, listing type, brand aliases, and
-   common buyer language.
-3. Refine candidate filtering and scoring so new/used behavior is intentional.
-4. Improve response formatting with consistent recommendation reasons and
-   explicit tradeoffs.
-5. Make all formatting null-safe.
-6. Add comparison request and response Pydantic schemas for 2 to 5 cars.
-7. Add a rule-based comparison service using structured PostgreSQL inventory.
-8. Add `POST /compare` and route `/chat` comparison intent to the comparison
-   workflow.
-9. Allow a later frontend to compare selected recommended inventory cars.
-10. Add optional RAG context only after the non-RAG recommendation and
-    comparison workflows are stable.
+1. Keep guardrails before intent classification.
+2. Keep deterministic shopping and greeting handling before RAG/general advice.
+3. Harden preference extraction for budgets, listing type, brand aliases, model
+   names, regions, and common buyer language.
+4. Refine candidate filtering and scoring so new/used behavior is intentional.
+5. Make all formatting null-safe and avoid raw JSON in user-facing answers.
+6. Keep comparison request and response schemas for 2 to 5 cars.
+7. Keep rule-based comparison service using structured inventory.
+8. Keep `/compare/cars` and route chat comparison intent to the comparison
+   workflow when possible.
+9. Keep price-check and dealer-contact intents connected to their dedicated
+   backend services.
+10. Keep optional OpenAI response polishing as a final answer rewrite only. It
+    must not invent cars, prices, dealerships, or live availability.
 
 ## Validation Scenarios
 
 - Reliable used city car under a budget.
+- "Reliable used car under $10,000 in Beirut" routes to `car_recommendation`.
 - New zero-mileage car with warranty.
 - New or used family SUV.
 - Luxury preference with low-maintenance concern.
 - No-match request.
+- Greeting such as "hello".
 - Missing mileage or warranty data.
 - Compare 2 cars.
 - Compare 3 to 5 cars.
 - Reject a comparison of more than 5 cars.
-- Request another car or broader filters when fewer than 2 cars are available.
+- Price-check with enough details and with missing fields.
+- Dealer-contact draft request.
 
 ## Non-Goals for This Spec
 
-- Persistent chat memory.
-- Trained ML intent classifier.
-- Fair-price regression.
-- Automatic dealer contact.
+- Real dealer message sending.
 - Live marketplace scraping.
+- Using OpenAI as the source of listings or prices.

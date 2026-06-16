@@ -5,25 +5,26 @@
 
 ## Goal
 
-Use image-derived suggestions to help collect structured used-car attributes
-before running the used-car price estimator. This is not image-only prediction.
+Use uploaded vehicle images for safety, quality, and context, then require the
+user to confirm structured used-car attributes before running the fair-price
+estimator. This is not image-only price prediction.
 
-## Planned Scope
+## Current Flow
 
-Flow: upload image -> NSFW/safety check -> quality check -> vehicle detection ->
-color/body-type/make-model suggestion -> user confirms structured fields ->
-used-car price estimator predicts a price range.
+Upload image -> upload guardrails -> NSFW/safety check -> quality and vehicle
+visibility checks -> color/body-type context -> user confirms structured fields
+-> used-car price estimator predicts a fair-price range.
 
-New-car images must not be routed into a used-car price prediction without
-explicitly confirmed used-car details.
+Confirmed image-derived profiles may also be matched against the curated
+inventory for similar cars and added to comparison as user-confirmed profiles.
 
-## Future Image-Derived Comparison
+## Rules
 
 - Uploaded images must not be compared as raw images only.
-- The image pipeline should extract or suggest vehicle attributes.
-- The user must confirm make, model, year, mileage, and condition before
-  comparison or price estimation.
-- After confirmation, image-derived car profiles may be compared with each
-  other or with PostgreSQL inventory cars.
-- This future workflow is not required before the basic inventory comparison
-  capability works.
+- AutoAdvisor must not estimate price from image alone.
+- The user must confirm make, model, year, mileage, fuel, transmission, and
+  other required estimator fields before price estimation.
+- New-car images must not be routed into the used-car estimator without
+  explicitly confirmed used-car details.
+- Uploaded profiles shown in comparison are not inventory listings.
+- Similar-car matching uses confirmed details, not exact image recognition.

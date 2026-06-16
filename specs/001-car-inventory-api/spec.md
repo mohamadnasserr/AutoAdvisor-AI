@@ -2,22 +2,26 @@
 
 ## Goal
 
-Store seeded new and used vehicle inventory in PostgreSQL and expose it through
+Store curated new and used vehicle inventory in PostgreSQL and expose it through
 FastAPI using validated Pydantic responses.
 
-## Audited Current State
+## Current State
 
 - PostgreSQL runs from `docker-compose.yml` using `pgvector/pgvector:pg16`.
-- FastAPI creates SQLAlchemy tables at startup.
-- `GET /health` and `GET /search/cars` are implemented and return HTTP 200.
-- `data/seed/cars.csv` contains 16 listings: 10 used and 6 new.
-- `scripts/seed_database.py` seeds cars and dealerships.
-- The running database contained 16 cars and 6 dealerships during the audit.
-- `GET /cars` and `GET /cars/{car_id}` are not implemented.
+- FastAPI creates SQLAlchemy tables at startup for the local MVP.
+- `GET /health`, `GET /cars`, `GET /cars/{car_id}`, and `GET /search/cars`
+  are implemented.
+- The curated demo inventory has been expanded to about 120 cars:
+  approximately 80 used cars and 40 new cars.
+- The seed data includes 11 demo dealerships.
+- Seed data includes representative `image_url` values for frontend cards.
+- `scripts/seed_database.py` remains idempotent: repeated runs skip duplicate
+  cars and can update existing image URLs without creating duplicate listings.
+- Inventory is curated demo data, not live scraped marketplace data.
 
 ## Car Data Model
 
-The current SQLAlchemy `Car` model contains:
+The SQLAlchemy `Car` model includes:
 
 - Identity/link: `id`, `dealer_id`
 - Listing state: `listing_type`, `is_new`, `availability_status`,
@@ -27,38 +31,41 @@ The current SQLAlchemy `Car` model contains:
 - Attributes: `body_type`, `fuel`, `transmission`, `color`, `condition`
 - New-car detail: `warranty_years`
 - Market: `region`
+- Demo visual: optional `image_url`
 
-`trim`, `mileage_km`, `color`, `condition`, `warranty_years`, and `dealer_id`
-may be null. API and seed behavior must tolerate those values.
+Nullable fields must remain safe across seeding, API serialization,
+recommendation output, comparison, and frontend display.
 
 ## API Requirements
 
-- Keep the working `GET /search/cars` route for compatibility.
-- Add `GET /cars` for a bounded inventory listing.
-- Add `GET /cars/{car_id}` with a clear 404 response.
-- Optionally alias `GET /cars/search` to the existing search behavior later.
-- Search supports budget, listing type, make, body type, fuel, region,
-  transmission, and maximum mileage where applicable.
-- Responses use `CarResponse` or a related Pydantic response schema.
+- Keep `GET /search/cars` as the working filtered search route.
+- Keep `GET /cars` for inventory listing.
+- Keep `GET /cars/{car_id}` with a clear 404 response.
+- Search supports budget, listing type, make, model, body type, fuel, region,
+  transmission, maximum mileage, and availability status where applicable.
+- Responses use `CarResponse` or related Pydantic response schemas.
 
 ## Product Rules
 
 - Support both new and used listings.
 - New cars may use zero or nullable mileage and usually have warranty data.
-- Used cars are the future ML price-estimation target.
+- Used cars are the target for fair-price estimation.
 - New cars support search, comparison, warranty/zero-mileage alternatives, and
   reference pricing.
-- Clearly treat inventory as seeded demo data unless an approved source is used.
+- Treat inventory as curated demo data unless an approved source is added.
+- Do not claim live availability unless the data comes from seeded or approved
+  inventory.
 - Do not use unauthorized scraping.
 
 ## Acceptance Criteria
 
 - API starts without errors.
 - PostgreSQL container runs.
-- Seed script inserts new and used cars without duplicate or control-flow errors.
+- Seed script inserts new and used cars without duplicate rows.
 - Search filters by budget, `listing_type`, make, body type, fuel, region,
-  transmission, and mileage where supported.
-- Missing values such as `warranty_years` or `mileage_km` do not crash seeding,
-  search, serialization, or recommendation output.
+  transmission, mileage, and availability status where supported.
+- Missing values such as `warranty_years`, `mileage_km`, and `image_url` do not
+  crash seeding, search, serialization, recommendation output, or frontend
+  cards.
 - Responses use Pydantic schemas.
 - Inventory and detail endpoints have automated API tests.
