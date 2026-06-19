@@ -31,6 +31,7 @@ const defaultPriceDetails = {
   max_power: 82,
   seats: 5,
   budget_max: "",
+  condition: "Good",
 };
 
 const emptyConfirmedVehicleDetails = {
@@ -47,6 +48,7 @@ const emptyConfirmedVehicleDetails = {
   max_power: "",
   seats: "",
   budget_max: "",
+  condition: "Good",
 };
 
 function scrollTo(id) {
@@ -117,6 +119,198 @@ function titleCase(value) {
     .split(" ")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(" ");
+}
+
+function carDisplayName(car) {
+  const year = car.year || "";
+  const make = car.make || car.brand || "";
+  const model = car.model || "";
+  const title = car.title || `${year} ${make} ${model}`;
+  return title.trim().replace(/\s+/g, " ") || "This car";
+}
+
+function includesAny(value, terms) {
+  return terms.some((term) => value.includes(term));
+}
+
+function addSentence(sentences, sentence) {
+  if (sentence && !sentences.includes(sentence)) sentences.push(sentence);
+}
+
+function addTag(tags, tag) {
+  if (tag) tags.add(tag);
+}
+
+function buildAdvisorOverview(car) {
+  const bodyType = String(car.body_type || "").toLowerCase();
+  const fuel = String(car.fuel || car.fuel_type || "").toLowerCase();
+  const transmission = String(car.transmission || car.transmission_type || "").toLowerCase();
+  const listingType = String(car.listing_type || "").toLowerCase();
+  const status = String(car.availability_status || "").toLowerCase();
+  const make = String(car.make || car.brand || "");
+  const makeLower = make.toLowerCase();
+  const model = String(car.model || "");
+  const modelLower = model.toLowerCase();
+  const year = Number(car.year);
+  const mileage = car.mileage_km === null || car.mileage_km === undefined
+    ? Number.NaN
+    : Number(car.mileage_km);
+  const price = Number(car.price_usd || car.estimated_price_usd || 0);
+  const name = carDisplayName(car);
+  const sentences = [];
+  const tags = new Set();
+  const cityModels = ["yaris", "picanto", "i10"];
+  const balancedSedans = ["corolla", "civic", "sunny", "sentra"];
+  const familyCrossovers = ["tucson", "sportage", "x-trail", "x trail", "duster"];
+  const largeSuvs = ["pajero", "grand cherokee", "wrangler"];
+  const premiumModels = ["c-class", "c class", "3 series", "a3", "a4", "lexus"];
+  const utilityModels = ["ranger"];
+  const commonResaleMakes = ["toyota", "honda", "nissan", "hyundai", "kia", "lexus"];
+  const premiumMakes = ["mercedes-benz", "mercedes", "bmw", "audi", "lexus"];
+
+  if (includesAny(modelLower, cityModels)) {
+    addSentence(sentences, `${name} has the profile of a compact city runabout, often a good fit for first-car buyers, daily commuting, and easy parking.`);
+    addTag(tags, "City-friendly");
+    addTag(tags, "Budget-friendly");
+  } else if (includesAny(modelLower, balancedSedans)) {
+    addSentence(sentences, `${name} sits in the practical sedan zone: useful for daily use, commuting, and buyers who want common parts and broad market familiarity.`);
+    addTag(tags, "Strong resale appeal");
+    addTag(tags, "Comfort-focused");
+  } else if (includesAny(modelLower, familyCrossovers)) {
+    addSentence(sentences, `${name} is the kind of crossover/SUV that may suit family use, mixed city/highway driving, and buyers who want more cabin space.`);
+    addTag(tags, "Family-friendly");
+    addTag(tags, "Comfort-focused");
+  } else if (includesAny(modelLower, largeSuvs)) {
+    addSentence(sentences, `${name} leans toward the larger-SUV side, with road presence and rough-road or outdoor appeal, but running costs are worth checking carefully.`);
+    addTag(tags, "Family-friendly");
+    addTag(tags, "Inspection recommended");
+  } else if (includesAny(modelLower, premiumModels) || premiumMakes.includes(makeLower)) {
+    addSentence(sentences, `${name} may appeal to buyers looking for a more premium cabin, stronger features, and a more refined feel, with a higher maintenance budget expected.`);
+    addTag(tags, "Premium feel");
+    addTag(tags, "Comfort-focused");
+  } else if (includesAny(modelLower, utilityModels) || bodyType.includes("pickup") || bodyType.includes("van")) {
+    addSentence(sentences, `${name} is more utility-focused, typically practical for cargo, work use, business needs, or heavier-duty daily tasks.`);
+    addTag(tags, "Utility-focused");
+  } else if (bodyType.includes("hatchback")) {
+    addSentence(sentences, `${name} should be easy to live with in tight streets and short city trips, especially if running costs matter.`);
+    addTag(tags, "City-friendly");
+  } else if (bodyType.includes("sedan")) {
+    addSentence(sentences, `${name} looks like a straightforward daily driver with a useful balance of comfort, practicality, and commuting value.`);
+    addTag(tags, "Comfort-focused");
+  } else if (bodyType.includes("suv")) {
+    addSentence(sentences, `${name} may be a good fit if you want a higher seating position, extra space, and stronger road presence.`);
+    addTag(tags, "Family-friendly");
+  } else if (bodyType.includes("coupe")) {
+    addSentence(sentences, `${name} may appeal more to style-focused drivers than buyers chasing maximum practicality.`);
+    addTag(tags, "Premium feel");
+  } else {
+    addSentence(sentences, `${name} is worth comparing if its price, mileage, and condition line up with your use case.`);
+  }
+
+  if (Number.isFinite(year)) {
+    if (year >= 2023) {
+      addSentence(sentences, `Being a newer model, it may offer more modern features and warranty potential, depending on trim and seller terms.`);
+      addTag(tags, "Newer model");
+    } else if (year >= 2018) {
+      addSentence(sentences, `The ${year} model year puts it in a modern used-car sweet spot for many buyers: newer feel without new-car pricing.`);
+      addTag(tags, "Value range");
+    } else {
+      addSentence(sentences, `As an older model, it may be budget-friendly, but inspection quality and maintenance records become especially important.`);
+      addTag(tags, "Budget-friendly");
+      addTag(tags, "Inspection recommended");
+    }
+  }
+
+  if (Number.isFinite(mileage) && listingType !== "new") {
+    if (mileage < 30000) {
+      addSentence(sentences, `Its low-mileage profile is appealing on paper, though condition and service records still need confirmation.`);
+      addTag(tags, "Low mileage");
+    } else if (mileage <= 90000) {
+      addSentence(sentences, `The mileage is moderate for a used car, so it could be a sensible shortlist candidate if servicing checks out.`);
+      addTag(tags, "Value range");
+    } else {
+      addSentence(sentences, `With higher mileage, a pre-purchase inspection and service-history review should be part of the decision.`);
+      addTag(tags, "Inspection recommended");
+    }
+  } else if (listingType === "new") {
+    addSentence(sentences, `As a new listing, it may be attractive for warranty coverage and lower short-term maintenance risk.`);
+    addTag(tags, "Newer model");
+  } else {
+    addSentence(sentences, `Mileage should be confirmed before comparing it seriously with other options.`);
+    addTag(tags, "Inspection recommended");
+  }
+
+  if (price > 0) {
+    if (price <= 8000) {
+      addSentence(sentences, `The price is budget-focused, which can be useful for cost control, but condition checks matter more at this level.`);
+      addTag(tags, "Budget-friendly");
+    } else if (price <= 15000) {
+      addSentence(sentences, `It sits in a value used-car range where buyers often balance price, mileage, and long-term ownership costs.`);
+      addTag(tags, "Value range");
+    } else if (price <= 30000) {
+      addSentence(sentences, `At this price point, expect stronger comfort, features, or newer-year appeal compared with entry-level options.`);
+      addTag(tags, "Comfort-focused");
+    } else {
+      addSentence(sentences, `This is in the premium or newer segment, so compare features, warranty terms, and depreciation carefully.`);
+      addTag(tags, "Premium feel");
+    }
+  }
+
+  if (fuel.includes("hybrid") || fuel.includes("electric")) {
+    addSentence(sentences, `The ${fuel.includes("electric") ? "electric" : "hybrid"} setup is efficiency-focused and may reduce fuel use, while battery condition or warranty is worth checking.`);
+    addTag(tags, "Fuel-efficient");
+  } else if (fuel.includes("diesel")) {
+    addSentence(sentences, `Diesel may suit longer-distance driving thanks to torque and economy, but maintenance history should be reviewed carefully.`);
+    addTag(tags, "Fuel-efficient");
+    addTag(tags, "Inspection recommended");
+  } else if (fuel.includes("petrol")) {
+    addSentence(sentences, `The petrol setup is familiar for local ownership, with fuel economy depending on engine size, traffic, and driving style.`);
+  }
+
+  if (transmission.includes("automatic")) {
+    addSentence(sentences, `Automatic transmission should make stop-and-go traffic and daily driving easier.`);
+    addTag(tags, "Comfort-focused");
+  } else if (transmission.includes("manual")) {
+    addSentence(sentences, `Manual transmission may keep ownership simpler and purchase cost lower, though it is less convenient in heavy traffic.`);
+    addTag(tags, "Budget-friendly");
+  }
+
+  if (commonResaleMakes.includes(makeLower)) {
+    addSentence(sentences, `${make} often has broad buyer familiarity in the region, which may help resale appeal if the car is clean and priced sensibly.`);
+    addTag(tags, "Strong resale appeal");
+  }
+
+  if (status === "sold") {
+    addSentence(sentences, `It is marked sold, so use it mainly as a reference point and search for similar available alternatives.`);
+  } else if (status === "reserved") {
+    addSentence(sentences, `It is marked reserved, so availability should be checked before spending too much time on it.`);
+  } else if (status === "available") {
+    addSentence(sentences, `It is currently shown as available in the demo inventory, so it is reasonable to compare against nearby alternatives.`);
+  }
+
+  const sentenceOffset = Number.isFinite(year) ? year % 3 : modelLower.length % 3;
+  const prioritizedSentences = [
+    sentences[0],
+    ...sentences.slice(1 + sentenceOffset),
+    ...sentences.slice(1, 1 + sentenceOffset),
+  ].filter(Boolean);
+
+  return {
+    tags: [...tags].slice(0, 4),
+    sentences: prioritizedSentences.slice(0, 4),
+  };
+}
+
+function AdvisorTags({ tags }) {
+  if (!tags?.length) return null;
+
+  return (
+    <div className="advisor-tags">
+      {tags.map((tag) => (
+        <span key={tag}>{tag}</span>
+      ))}
+    </div>
+  );
 }
 
 function uniqueSortedValues(cars, key) {
@@ -229,6 +423,12 @@ function CarCard({ car, compareSelection = [], onAddCompare }) {
   const status = String(car.availability_status || "unknown").toLowerCase();
   const isSold = status === "sold";
   const carCompareKey = compareKeyFor(car);
+  const advisor = buildAdvisorOverview(car);
+  const imageUrl = String(car.image_url || "").trim();
+  const [imageUnavailable, setImageUnavailable] = useState(!imageUrl);
+  useEffect(() => {
+    setImageUnavailable(!imageUrl);
+  }, [imageUrl]);
   const isSelectedForCompare = compareSelection.some(
     (item) => compareKeyFor(item) === carCompareKey,
   );
@@ -236,14 +436,17 @@ function CarCard({ car, compareSelection = [], onAddCompare }) {
 
   return (
     <article className="car-card">
-      {car.image_url && (
+      {!imageUnavailable ? (
         <img
-          src={car.image_url}
+          src={imageUrl}
           alt={`Representative ${car.make} ${car.model}`}
-          onError={(event) => {
-            event.currentTarget.style.display = "none";
-          }}
+          onError={() => setImageUnavailable(true)}
         />
+      ) : (
+        <div className="car-image-placeholder">
+          <span>AutoAdvisor AI</span>
+          <strong>Representative image unavailable</strong>
+        </div>
       )}
       <div className="car-card-body">
         <div className="car-card-meta">
@@ -266,6 +469,15 @@ function CarCard({ car, compareSelection = [], onAddCompare }) {
           {car.body_type} · {car.fuel} · {car.transmission}
         </p>
         <small>{car.region}</small>
+        <AdvisorTags tags={advisor.tags} />
+        <details className="advisor-overview">
+          <summary>Advisor overview</summary>
+          <div>
+            {advisor.sentences.map((sentence) => (
+              <p key={sentence}>{sentence}</p>
+            ))}
+          </div>
+        </details>
         {isSold && (
           <p className="sold-interest-note">
             This car is marked sold. You can still save interest for similar alternatives.
@@ -395,11 +607,20 @@ function PriceFields({ details, setDetails, includeProfileFields = false }) {
       </Field>
       <Field label="Vehicle age"><input type="number" value={details.vehicle_age} onChange={(e) => update("vehicle_age", e.target.value)} /></Field>
       <Field label="Engine (cc)"><input type="number" value={details.engine} onChange={(e) => update("engine", e.target.value)} /></Field>
-      <Field label="Fuel economy"><input type="number" step="0.1" value={details.mileage} onChange={(e) => update("mileage", e.target.value)} /></Field>
+      {!includeProfileFields && (
+        <Field label="Fuel economy"><input type="number" step="0.1" value={details.mileage} onChange={(e) => update("mileage", e.target.value)} /></Field>
+      )}
       <Field label="Max power"><input type="number" value={details.max_power} onChange={(e) => update("max_power", e.target.value)} /></Field>
       <Field label="Seats"><input type="number" value={details.seats} onChange={(e) => update("seats", e.target.value)} /></Field>
       {includeProfileFields && (
-        <Field label="Budget"><input type="number" value={details.budget_max} onChange={(e) => update("budget_max", e.target.value)} placeholder="Optional" /></Field>
+        <>
+          <Field label="Budget"><input type="number" value={details.budget_max} onChange={(e) => update("budget_max", e.target.value)} placeholder="Optional" /></Field>
+          <Field label="Condition">
+            <select value={details.condition} onChange={(e) => update("condition", e.target.value)}>
+              {["Excellent", "Good", "Fair", "Needs inspection"].map((item) => <option key={item}>{item}</option>)}
+            </select>
+          </Field>
+        </>
       )}
     </div>
   );
@@ -413,7 +634,7 @@ function pricePayload(details) {
     km_driven: Number(details.mileage_km),
     fuel_type: details.fuel_type,
     transmission_type: details.transmission_type,
-    mileage: Number(details.mileage),
+    mileage: Number(details.mileage || 18),
     engine: Number(details.engine),
     max_power: Number(details.max_power),
     seats: Number(details.seats),
@@ -695,17 +916,22 @@ function NeutralSection({ compareSelection, onRemoveCompare }) {
         </div>
         {compareSelection.length ? (
           <div className="compare-chip-row">
-            {compareSelection.map((item) => (
-              <div className={`compare-chip ${item.kind === "uploaded_profile" ? "profile" : ""}`} key={compareKeyFor(item)}>
-                <strong>{item.year || "Year"} {item.make || item.brand} {item.model}</strong>
-                <span>
-                  {item.kind === "uploaded_profile"
-                    ? "Confirmed image profile"
-                    : `Car ID: ${item.id}`}
-                </span>
-                <button onClick={() => onRemoveCompare(compareKeyFor(item))}>Remove</button>
-              </div>
-            ))}
+            {compareSelection.map((item) => {
+              const advisor = buildAdvisorOverview(item);
+
+              return (
+                <div className={`compare-chip ${item.kind === "uploaded_profile" ? "profile" : ""}`} key={compareKeyFor(item)}>
+                  <strong>{item.year || "Year"} {item.make || item.brand} {item.model}</strong>
+                  <span>
+                    {item.kind === "uploaded_profile"
+                      ? "Confirmed image profile"
+                      : `Car ID: ${item.id}`}
+                  </span>
+                  <AdvisorTags tags={advisor.tags.slice(0, 3)} />
+                  <button onClick={() => onRemoveCompare(compareKeyFor(item))}>Remove</button>
+                </div>
+              );
+            })}
           </div>
         ) : (
           <p className="muted">No cars selected yet.</p>
@@ -719,7 +945,33 @@ function NeutralSection({ compareSelection, onRemoveCompare }) {
       <Notice type="info">{notice}</Notice>
       {result && <>
         <div className="assistant-card"><span className="assistant-label">Verdict</span><p>{result.final_verdict}</p></div>
-        <div className="comparison-grid">{result.cars.map((car) => <article className="comparison-card" key={car.id}><h3>{car.title}</h3><p>${Number(car.price_usd).toLocaleString()} · {car.mileage_km?.toLocaleString() || 0} km</p><p>{car.body_type} · {car.fuel} · {car.transmission}</p><h4>Strengths</h4><ul>{car.strengths.map((item) => <li key={item}>{item}</li>)}</ul><h4>Risks</h4><ul>{car.risks.map((item) => <li key={item}>{item}</li>)}</ul><p><strong>Best use:</strong> {car.best_use_case}</p></article>)}</div>
+        <div className="comparison-grid">
+          {result.cars.map((car) => {
+            const advisor = buildAdvisorOverview(car);
+
+            return (
+              <article className="comparison-card" key={car.id}>
+                <h3>{car.title}</h3>
+                <p>${Number(car.price_usd).toLocaleString()} · {car.mileage_km?.toLocaleString() || 0} km</p>
+                <p>{car.body_type} · {car.fuel} · {car.transmission}</p>
+                <AdvisorTags tags={advisor.tags} />
+                <details className="advisor-overview">
+                  <summary>Advisor overview</summary>
+                  <div>
+                    {advisor.sentences.map((sentence) => (
+                      <p key={sentence}>{sentence}</p>
+                    ))}
+                  </div>
+                </details>
+                <h4>Strengths</h4>
+                <ul>{car.strengths.map((item) => <li key={item}>{item}</li>)}</ul>
+                <h4>Risks</h4>
+                <ul>{car.risks.map((item) => <li key={item}>{item}</li>)}</ul>
+                <p><strong>Best use:</strong> {car.best_use_case}</p>
+              </article>
+            );
+          })}
+        </div>
       </>}
       {selectedProfiles.length > 0 && (
         <div className="uploaded-profile-block">
@@ -735,6 +987,7 @@ function NeutralSection({ compareSelection, onRemoveCompare }) {
                   {profile.mileage_km ? `${Number(profile.mileage_km).toLocaleString()} km` : "Mileage not confirmed"}
                 </p>
                 <p>{profile.body_type || "Body type not confirmed"} · {profile.fuel || "Fuel not confirmed"} · {profile.transmission || "Transmission not confirmed"}</p>
+                {profile.condition && <p><strong>Condition:</strong> {profile.condition}</p>}
                 {profile.estimated_price_usd && (
                   <p>
                     Estimated fair price: <strong>${Number(profile.estimated_price_usd).toLocaleString()}</strong>
@@ -839,6 +1092,7 @@ function ImageEvaluationSection({ compareSelection, onAddCompare }) {
       fuel: details.fuel_type,
       transmission: details.transmission_type,
       budget_max: details.budget_max,
+      condition: details.condition,
       estimated_price_usd: priceResult?.estimated_price_usd,
       low_estimate_usd: priceResult?.low_estimate_usd,
       high_estimate_usd: priceResult?.high_estimate_usd,

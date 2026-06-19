@@ -53,6 +53,7 @@ RECOMMENDATION_ACTION_PATTERNS = [
     "recommend",
     "find me",
     "show me",
+    "suggest",
     "looking for",
     "i need",
     "i want",
@@ -70,6 +71,21 @@ VEHICLE_SHOPPING_TERMS = [
     "coupe",
     "pickup",
     "van",
+    "fast",
+    "sport",
+    "sporty",
+    "performance",
+    "luxury",
+    "premium",
+    "exotic",
+    "supercar",
+    "ferrari",
+    "lamborghini",
+    "porsche",
+    "amg",
+    "gtr",
+    "gt-r",
+    "corvette",
 ]
 
 SHOPPING_DETAIL_PATTERNS = [
@@ -87,7 +103,16 @@ SHOPPING_DETAIL_PATTERNS = [
     "tripoli",
     "saida",
     "jounieh",
+    "above one million",
+    "over one million",
+    "more than one million",
+    "extravagant",
 ]
+
+BUDGET_PATTERN = (
+    r"(?:under|below|around|max(?:imum)?|budget|for|between|from|more than|"
+    r"above|over|greater than|starting|minimum|not less than)\s*\$?\s*[\d,]+"
+)
 
 
 def deterministic_intent_override(message: str) -> str | None:
@@ -105,16 +130,13 @@ def deterministic_intent_override(message: str) -> str | None:
     if any(word in text for word in ["image", "photo", "picture", "upload", "analyze this car", "car image"]):
         return "image_analysis"
 
-    if any(word in text for word in ["price", "fair", "overpriced", "worth", "value", "estimate"]):
-        return "price_check"
-
     if any(pattern in text for pattern in GENERAL_ADVICE_PATTERNS):
         return None
 
     has_vehicle_term = any(term in text for term in VEHICLE_SHOPPING_TERMS)
     has_action = any(pattern in text for pattern in RECOMMENDATION_ACTION_PATTERNS)
     has_budget = bool(
-        re.search(r"(?:under|below|around|max(?:imum)?|budget|for)\s*\$?\s*[\d,]+", text)
+        re.search(BUDGET_PATTERN, text)
         or re.search(r"\$\s*[\d,]+", text)
     )
     shopping_detail_count = sum(
@@ -123,6 +145,9 @@ def deterministic_intent_override(message: str) -> str | None:
 
     if has_vehicle_term and (has_action or has_budget or shopping_detail_count >= 1):
         return "car_recommendation"
+
+    if any(word in text for word in ["price", "fair", "overpriced", "worth", "value", "estimate"]):
+        return "price_check"
 
     return None
 

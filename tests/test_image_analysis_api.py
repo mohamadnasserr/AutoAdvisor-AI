@@ -4,6 +4,7 @@ from fastapi.testclient import TestClient
 from PIL import Image, ImageDraw
 
 from backend.app.main import app
+from backend.app.services import vehicle_vision_service
 
 
 client = TestClient(app)
@@ -64,6 +65,56 @@ def test_image_analyze_accepts_safe_valid_image():
         "metadata_estimated",
         "needs_better_image_before_metadata_extraction",
     }
+    assert data["vision_enabled"] is False
+    assert data["possible_make"] is None
+    assert data["possible_model"] is None
+    assert data["damage_or_issue_hints"] == []
+
+
+def test_image_analyze_vision_disabled_does_not_call_openai(monkeypatch):
+    class UnexpectedOpenAI:
+        def __init__(self, **kwargs):
+            raise AssertionError("OpenAI vision must not be called when disabled")
+
+    monkeypatch.setattr(vehicle_vision_service.settings, "vision_provider", "none")
+    monkeypatch.setattr(vehicle_vision_service.settings, "openai_api_key", None)
+    monkeypatch.setattr(vehicle_vision_service, "OpenAI", UnexpectedOpenAI)
+
+    response = client.post(
+        "/image/analyze",
+        files={"file": ("car.png", make_image(), "image/png")},
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["safe_image"] is True
+    assert data["vision_enabled"] is False
+    assert "vision analysis is disabled" in data["vision_reminder"].lower()
+
+
+def test_image_analyze_rejected_upload_skips_vision(monkeypatch):
+    def unexpected_vision_call(*args, **kwargs):
+        raise AssertionError("Vision must not run for rejected uploads")
+
+    monkeypatch.setattr(
+        "backend.app.api.image_routes.analyze_vehicle_image_with_vision",
+        unexpected_vision_call,
+    )
+
+    response = client.post(
+        "/image/analyze",
+        files={"file": ("car.txt", b"not an image", "text/plain")},
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["safe_image"] is False
+    assert data["accepted_for_analysis"] is False
+    assert data["vision_enabled"] is False
 
 
 def test_image_analyze_rejects_unsupported_file_type():

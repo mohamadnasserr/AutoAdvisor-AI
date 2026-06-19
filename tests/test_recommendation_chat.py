@@ -46,6 +46,144 @@ def test_chat_routes_clear_used_car_shopping_request_to_recommendations():
     assert data["recommended_cars"] or "could not find a strong match" in data["answer"]
 
 
+def test_chat_recommends_used_cars_for_budget_range_request():
+    response = client.post(
+        "/chat",
+        json={
+            "message": "can you show me some good used cars in the range between 5000 to 15000",
+            "session_id": "budget-range-recommendation-test",
+        },
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["intent"] == "car_recommendation"
+    assert data["extracted_preferences"]["listing_type"] == "used"
+    assert data["extracted_preferences"]["budget_min"] == 5000
+    assert data["extracted_preferences"]["budget_max"] == 15000
+    assert len(data["recommended_cars"]) > 0
+    assert "I couldn’t find a strong match" not in data["answer"]
+    assert "I could not find a strong match" not in data["answer"]
+    assert "Based on the AutoAdvisor knowledge base" not in data["answer"]
+
+    for car in data["recommended_cars"]:
+        assert car["listing_type"] == "used"
+        assert car["price_usd"] <= 17250
+
+
+def test_chat_recommends_used_cars_for_budget_minimum_request_with_price_word():
+    response = client.post(
+        "/chat",
+        json={
+            "message": "show me some used cars more than 10000 price",
+            "session_id": "budget-minimum-recommendation-test",
+        },
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["intent"] == "car_recommendation"
+    assert data["extracted_preferences"]["listing_type"] == "used"
+    assert data["extracted_preferences"]["budget_min"] == 10000
+    assert data["extracted_preferences"]["budget_max"] is None
+    assert len(data["recommended_cars"]) > 0
+    assert "Missing fields" not in data["answer"]
+    assert "Please send something like" not in data["answer"]
+    assert "2018 Hyundai i20" not in data["answer"]
+
+    for car in data["recommended_cars"]:
+        assert car["listing_type"] == "used"
+        assert car["price_usd"] >= 8500
+
+
+def test_chat_recommends_performance_cars_for_fast_request():
+    response = client.post(
+        "/chat",
+        json={
+            "message": "I want a fast car",
+            "session_id": "performance-recommendation-test",
+        },
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+    recommended_cars = data["recommended_cars"]
+
+    assert data["intent"] == "car_recommendation"
+    assert data["extracted_preferences"]["performance_intent"] is True
+    assert data["extracted_preferences"]["style_preference"] == "performance"
+    assert len(recommended_cars) > 0
+
+    performance_markers = {
+        "Ferrari",
+        "Lamborghini",
+        "Porsche",
+        "AMG GT",
+        "M4",
+        "RS7",
+        "GT-R",
+        "Corvette",
+        "LC 500",
+    }
+    assert any(
+        car["make"] in performance_markers
+        or car["model"] in performance_markers
+        or (car.get("trim") in performance_markers)
+        for car in recommended_cars
+    )
+    assert recommended_cars[0]["price_usd"] >= 70000
+
+
+def test_chat_recommends_high_price_exotics_for_above_one_million_request():
+    response = client.post(
+        "/chat",
+        json={
+            "message": "show me a car above one million",
+            "session_id": "million-dollar-recommendation-test",
+        },
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+    recommended_cars = data["recommended_cars"]
+
+    assert data["intent"] == "car_recommendation"
+    assert data["extracted_preferences"]["budget_min"] == 1000000
+    assert data["extracted_preferences"]["exotic_intent"] is True
+    assert data["extracted_preferences"]["style_preference"] == "exotic"
+    assert len(recommended_cars) > 0
+    assert any(car["price_usd"] >= 1000000 for car in recommended_cars)
+    assert recommended_cars[0]["price_usd"] >= 700000
+
+
+def test_chat_recommends_ferrari_when_requested():
+    response = client.post(
+        "/chat",
+        json={
+            "message": "I want a Ferrari",
+            "session_id": "ferrari-recommendation-test",
+        },
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+    recommended_cars = data["recommended_cars"]
+
+    assert data["intent"] == "car_recommendation"
+    assert data["extracted_preferences"]["brand_preference"] == "Ferrari"
+    assert data["extracted_preferences"]["exotic_intent"] is True
+    assert len(recommended_cars) > 0
+    assert any(car["make"] == "Ferrari" for car in recommended_cars)
+    assert recommended_cars[0]["make"] == "Ferrari"
+
+
 def test_chat_greeting_returns_help_instead_of_rag_advice():
     response = client.post(
         "/chat",
@@ -192,6 +330,8 @@ def test_chat_price_check_returns_fair_price_range():
     assert data["intent"] == "price_check"
     assert "Used-car fair price estimate" in data["answer"]
     assert "Fair range" in data["answer"]
+    assert "ML baseline" in data["answer"]
+    assert "Inventory calibration" in data["answer"]
     assert "Verdict" in data["answer"]
     assert "$8,500" in data["answer"]
 

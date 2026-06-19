@@ -192,6 +192,12 @@ def seed_database() -> None:
         db.commit()
 
         total_cars = db.query(Car).count()
+        cars_with_image_url = (
+            db.query(Car)
+            .filter(Car.image_url.isnot(None))
+            .filter(Car.image_url != "")
+            .count()
+        )
         total_dealers = db.query(Dealership).count()
 
         print("Seed database completed successfully.")
@@ -199,6 +205,7 @@ def seed_database() -> None:
         print(f"Skipped existing cars: {skipped_cars}")
         print(f"Existing car image URLs updated: {updated_image_urls}")
         print(f"Total cars in database: {total_cars}")
+        print(f"Cars with image_url: {cars_with_image_url}")
         print(f"Total dealerships in database: {total_dealers}")
 
     except Exception:

@@ -111,7 +111,7 @@ def chat(request: ChatRequest, db: Session = Depends(get_db)):
         elif not price_estimator.is_available():
             answer = "The used-car price estimator model is currently unavailable."
         else:
-            prediction = price_estimator.predict(extracted_price_check.request)
+            prediction = price_estimator.predict(extracted_price_check.request, db=db)
 
             asking_price = extracted_price_check.asking_price_usd
             if asking_price is None:
@@ -131,6 +131,8 @@ def chat(request: ChatRequest, db: Session = Depends(get_db)):
                 "Used-car fair price estimate:\n"
                 f"- Estimated price: ${prediction.estimated_price_usd:,.0f}\n"
                 f"- Fair range: ${prediction.low_estimate_usd:,.0f}–${prediction.high_estimate_usd:,.0f}\n"
+                f"- ML baseline: ${prediction.ml_estimated_price_usd:,.0f}\n"
+                f"- Inventory calibration: {prediction.calibration_note}\n"
                 f"- {asking_price_text}\n"
                 f"- Verdict: {verdict}\n\n"
                 f"Model info: MAE ≈ ${prediction.model_mae_usd:,.0f}, R² ≈ {prediction.model_r2}.\n"

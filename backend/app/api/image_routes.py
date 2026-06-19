@@ -12,6 +12,10 @@ from backend.app.services.image_safety_service import check_image_safety
 from backend.app.services.similar_car_service import find_similar_cars
 from backend.app.services.upload_guardrail_service import validate_image_upload
 from backend.app.services.vehicle_image_metadata_service import extract_vehicle_image_metadata
+from backend.app.services.vehicle_vision_service import (
+    analyze_vehicle_image_with_vision,
+    disabled_vehicle_vision_result,
+)
 
 router = APIRouter(tags=["image-analysis"])
 
@@ -71,6 +75,14 @@ async def analyze_image(file: UploadFile = File(...)) -> ImageAnalysisResponse:
         height=upload_result.height,
         accepted_for_analysis=accepted_for_analysis,
     )
+    vision_result = (
+        analyze_vehicle_image_with_vision(
+            file_bytes=file_bytes,
+            filename=file.filename or "",
+        )
+        if accepted_for_analysis
+        else disabled_vehicle_vision_result()
+    )
 
     return ImageAnalysisResponse(
         safe_image=True,
@@ -89,6 +101,16 @@ async def analyze_image(file: UploadFile = File(...)) -> ImageAnalysisResponse:
         dominant_color=metadata.dominant_color,
         estimated_body_type=metadata.estimated_body_type,
         analysis_status=metadata.analysis_status,
+        vision_enabled=vision_result.vision_enabled if vision_result else False,
+        possible_make=vision_result.possible_make if vision_result else None,
+        possible_model=vision_result.possible_model if vision_result else None,
+        vision_body_type=vision_result.vision_body_type if vision_result else None,
+        vision_color=vision_result.vision_color if vision_result else None,
+        visible_angle=vision_result.visible_angle if vision_result else None,
+        visible_condition_notes=vision_result.visible_condition_notes if vision_result else None,
+        damage_or_issue_hints=vision_result.damage_or_issue_hints if vision_result else [],
+        vision_confidence=vision_result.vision_confidence if vision_result else None,
+        vision_reminder=vision_result.vision_reminder if vision_result else None,
     )
 
 

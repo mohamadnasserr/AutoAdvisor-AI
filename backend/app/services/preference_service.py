@@ -7,20 +7,137 @@ BODY_TYPES = ["sedan", "suv", "hatchback", "coupe", "pickup", "van"]
 FUEL_TYPES = ["petrol", "diesel", "hybrid", "electric"]
 TRANSMISSIONS = ["automatic", "manual"]
 
-BRANDS = [
-    "toyota",
-    "honda",
-    "kia",
-    "hyundai",
-    "nissan",
-    "bmw",
-    "mercedes",
-    "mercedes-benz",
+BRAND_ALIASES = {
+    "toyota": "Toyota",
+    "honda": "Honda",
+    "kia": "Kia",
+    "hyundai": "Hyundai",
+    "nissan": "Nissan",
+    "bmw": "BMW",
+    "mercedes-benz": "Mercedes-Benz",
+    "mercedes": "Mercedes-Benz",
+    "audi": "Audi",
+    "lexus": "Lexus",
+    "ferrari": "Ferrari",
+    "lamborghini": "Lamborghini",
+    "porsche": "Porsche",
+    "bentley": "Bentley",
+    "rolls-royce": "Rolls-Royce",
+    "rolls royce": "Rolls-Royce",
+    "range rover": "Land Rover",
+    "land rover": "Land Rover",
+    "chevrolet": "Chevrolet",
+    "ford": "Ford",
+    "jeep": "Jeep",
+}
+
+BRANDS = sorted(BRAND_ALIASES, key=len, reverse=True)
+
+PERFORMANCE_TERMS = [
+    "fast",
+    "sport",
+    "sporty",
+    "performance",
+    "sports car",
+    "amg",
+    "competition",
+    "rs7",
+    "gt-r",
+    "gtr",
+    "corvette",
+    "turbo s",
+    "gt3",
 ]
+
+LUXURY_TERMS = [
+    "luxury",
+    "premium",
+    "fancy",
+    "extravagant",
+    "maybach",
+    "bentley",
+    "rolls",
+    "range rover",
+    "s-class",
+    "g63",
+    "lexus",
+]
+
+EXOTIC_TERMS = [
+    "exotic",
+    "supercar",
+    "ferrari",
+    "lamborghini",
+    "huracan",
+    "aventador",
+    "sf90",
+    "f8",
+    "488",
+    "above one million",
+    "over one million",
+    "more than one million",
+]
+
+
+def _money_value(raw_value: str) -> float:
+    normalized = raw_value.lower().replace("$", "").replace(",", "").strip()
+    multiplier = 1000 if normalized.endswith("k") else 1
+    normalized = normalized.removesuffix("k").strip()
+    return float(normalized) * multiplier
+
+
+def extract_budget_range(text: str) -> tuple[float | None, float | None]:
+    cleaned = text.lower().replace(",", "")
+    money = r"\$?\s*\d+(?:\.\d+)?\s*k?"
+
+    range_patterns = [
+        rf"between\s+({money})\s+(?:and|to|-)\s+({money})",
+        rf"from\s+({money})\s+(?:to|-)\s+({money})",
+        rf"({money})\s*(?:-|to)\s*({money})",
+    ]
+
+    for pattern in range_patterns:
+        match = re.search(pattern, cleaned)
+        if match:
+            first = _money_value(match.group(1))
+            second = _money_value(match.group(2))
+            return min(first, second), max(first, second)
+
+    return None, None
+
+
+def extract_budget_minimum(text: str) -> float | None:
+    cleaned = text.lower().replace(",", "")
+    money = r"\$?\s*\d+(?:\.\d+)?\s*k?"
+
+    if re.search(r"(?:more than|above|over|greater than)\s+one million", cleaned):
+        return 1_000_000
+
+    minimum_patterns = [
+        rf"more than\s+({money})",
+        rf"above\s+({money})",
+        rf"over\s+({money})",
+        rf"greater than\s+({money})",
+        rf"from\s+({money})",
+        rf"starting\s+({money})",
+        rf"minimum\s+({money})",
+        rf"not less than\s+({money})",
+    ]
+
+    for pattern in minimum_patterns:
+        match = re.search(pattern, cleaned)
+        if match:
+            return _money_value(match.group(1))
+
+    return None
 
 
 def extract_budget(text: str) -> float | None:
     cleaned = text.lower().replace(",", "")
+    _, budget_max = extract_budget_range(cleaned)
+
+    if budget_max is not None:
+        return budget_max
 
     patterns = [
         r"under\s*\$?(\d+)",
@@ -84,7 +201,11 @@ def extract_listing_type(text: str) -> str | None:
 def extract_preferences(message: str) -> PreferenceExtraction:
     text = message.lower()
 
-    budget = extract_budget(text)
+    budget_min, budget_max = extract_budget_range(text)
+    budget_min = budget_min or extract_budget_minimum(text)
+    budget = budget_max if budget_max is not None else (
+        None if budget_min is not None else extract_budget(text)
+    )
     listing_type = extract_listing_type(text)
 
     body_type = next((b for b in BODY_TYPES if b in text), None)
@@ -103,12 +224,44 @@ def extract_preferences(message: str) -> PreferenceExtraction:
         use_case = "family"
         priorities.extend(["space", "safety", "comfort"])
 
+    performance_intent = any(term in text for term in PERFORMANCE_TERMS)
     luxury_preference = any(
         word in text for word in ["luxury", "fancy", "premium", "bmw", "mercedes"]
-    )
+    ) or any(term in text for term in LUXURY_TERMS)
+    exotic_intent = any(term in text for term in EXOTIC_TERMS)
+
+    if brand in {"ferrari", "lamborghini", "porsche"}:
+        performance_intent = True
+
+    if brand in {"ferrari", "lamborghini", "bentley", "rolls-royce", "rolls royce"}:
+        exotic_intent = True
+
+    if brand in {"bmw", "mercedes", "mercedes-benz", "audi", "lexus", "bentley", "rolls-royce", "rolls royce", "range rover", "land rover"}:
+        luxury_preference = True
+
+    if budget_min is not None and budget_min >= 1_000_000:
+        exotic_intent = True
+        luxury_preference = True
+
+    style_preference = None
+    if exotic_intent:
+        style_preference = "exotic"
+    elif performance_intent:
+        style_preference = "performance"
+    elif luxury_preference:
+        style_preference = "luxury"
+
+    if style_preference and listing_type is None:
+        listing_type = "both"
 
     if luxury_preference:
         priorities.append("premium comfort")
+
+    if performance_intent:
+        priorities.append("performance")
+
+    if exotic_intent:
+        priorities.append("exotic appeal")
 
     if "reliable" in text or "reliability" in text:
         priorities.append("reliability")
@@ -123,13 +276,17 @@ def extract_preferences(message: str) -> PreferenceExtraction:
 
     return PreferenceExtraction(
         budget_max=budget,
+        budget_min=budget_min,
         region=region,
         listing_type=listing_type,
         use_case=use_case,
         body_type=body_type.title() if body_type else None,
         fuel=fuel.title() if fuel else None,
         transmission=transmission.title() if transmission else None,
-        brand_preference=brand.title() if brand else None,
+        brand_preference=BRAND_ALIASES[brand] if brand else None,
         luxury_preference=luxury_preference,
+        performance_intent=performance_intent,
+        exotic_intent=exotic_intent,
+        style_preference=style_preference,
         priorities=list(dict.fromkeys(priorities)),
     )

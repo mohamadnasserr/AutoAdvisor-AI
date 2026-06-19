@@ -28,12 +28,17 @@ def test_used_car_price_estimator_returns_prediction_range():
     data = response.json()
 
     assert data["estimated_price_usd"] > 0
+    assert data["ml_estimated_price_usd"] > 0
     assert data["low_estimate_usd"] > 0
     assert data["high_estimate_usd"] > data["low_estimate_usd"]
     assert data["low_estimate_usd"] <= data["estimated_price_usd"] <= data["high_estimate_usd"]
+    assert data["fair_price_low_usd"] == data["low_estimate_usd"]
+    assert data["fair_price_high_usd"] == data["high_estimate_usd"]
     assert data["currency"] == "USD"
     assert data["model_mae_usd"] is not None
     assert data["model_r2"] is not None
+    assert data["calibration_note"]
+    assert "inventory" in data["calibration_note"].lower()
     assert "used cars only" in data["disclaimer"]
 
 
