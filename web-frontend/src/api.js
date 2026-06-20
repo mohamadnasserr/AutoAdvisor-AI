@@ -29,7 +29,20 @@ export async function apiGet(path, params = {}) {
       url.searchParams.set(key, value);
     }
   });
-  return parseResponse(await fetch(url));
+  return parseResponse(
+    await fetch(url, {
+      method: "GET",
+      headers: { Accept: "application/json" },
+    }),
+  );
+}
+
+export function getDealerLeads(params = {}) {
+  return apiGet("/dealer/leads", params);
+}
+
+export function getDealerships() {
+  return apiGet("/dealer/dealerships");
 }
 
 export async function apiPost(path, payload) {

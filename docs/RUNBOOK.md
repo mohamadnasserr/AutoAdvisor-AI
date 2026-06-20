@@ -22,3 +22,9 @@ streamlit run frontend\streamlit_app.py
 ```
 
 The backend health endpoint is available at `http://localhost:8000/health`.
+
+## Clean Demo Leads
+
+Before a clean demo, run `python scripts/reset_demo_leads.py` to clear saved
+buyer interests. This deletes dealer leads only; inventory, dealerships, RAG
+documents, and image data are preserved.

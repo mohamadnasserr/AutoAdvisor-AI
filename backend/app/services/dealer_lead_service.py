@@ -1,7 +1,12 @@
 from sqlalchemy.orm import Session
 
-from backend.app.models.db_models import Car, DealerLead
-from backend.app.models.schemas import DealerLeadCreateRequest, DealerLeadResponse
+from backend.app.models.db_models import Car, DealerLead, Dealership
+from backend.app.models.schemas import (
+    DealerLeadCreateRequest,
+    DealerLeadListItem,
+    DealerLeadResponse,
+    DealershipListItem,
+)
 from backend.app.services.preference_service import extract_preferences
 
 def build_dealer_inquiry_draft(car: Car) -> str:
@@ -56,6 +61,72 @@ def create_dealer_lead(
         message_draft=message_draft,
         status=lead.status,
     )
+
+
+def list_dealer_leads(
+    db: Session,
+    dealer_id: int | None = None,
+    lead_status: str | None = None,
+) -> list[DealerLeadListItem]:
+    query = (
+        db.query(DealerLead, Car, Dealership)
+        .outerjoin(Car, DealerLead.selected_car_id == Car.id)
+        .outerjoin(Dealership, Car.dealer_id == Dealership.id)
+    )
+
+    if dealer_id is not None:
+        query = query.filter(Dealership.id == dealer_id)
+
+    if lead_status:
+        query = query.filter(DealerLead.status == lead_status)
+
+    rows = query.order_by(DealerLead.created_at.desc(), DealerLead.id.desc()).all()
+    items: list[DealerLeadListItem] = []
+
+    for lead, car, dealership in rows:
+        if car is None:
+            car_title = "Unknown car"
+        else:
+            title_parts = [str(car.year), car.make, car.model, car.trim or ""]
+            car_title = " ".join(part for part in title_parts if part).strip()
+
+        items.append(
+            DealerLeadListItem(
+                lead_id=lead.id,
+                status=lead.status,
+                selected_car_id=lead.selected_car_id,
+                car_title=car_title,
+                car_price_usd=car.price_usd if car else None,
+                dealership_id=dealership.id if dealership else None,
+                dealership_name=dealership.name if dealership else None,
+                customer_name=lead.customer_name,
+                customer_phone=lead.customer_phone,
+                customer_email=lead.customer_email,
+                preferred_contact_method=lead.preferred_contact_method,
+                budget=lead.budget,
+                user_location=lead.user_location,
+                notes=lead.notes,
+                message_draft=lead.message_draft,
+                created_at=lead.created_at,
+            )
+        )
+
+    return items
+
+
+def list_dealerships(db: Session) -> list[DealershipListItem]:
+    dealerships = db.query(Dealership).order_by(Dealership.name.asc()).all()
+
+    return [
+        DealershipListItem(
+            id=dealership.id,
+            name=dealership.name,
+            location=dealership.location,
+            phone=dealership.phone,
+            email=dealership.email,
+        )
+        for dealership in dealerships
+    ]
 
 def find_car_for_dealer_request(db: Session, message: str) -> Car | None:
     text = message.lower()

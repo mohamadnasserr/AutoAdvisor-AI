@@ -353,13 +353,12 @@ function SaveInterestForm({
     setError("");
     setResult(null);
     try {
-      setResult(
-        await apiPost("/dealer/leads", {
-          ...form,
-          selected_car_id: Number(form.selected_car_id),
-          budget: form.budget ? Number(form.budget) : null,
-        }),
-      );
+      const savedLead = await apiPost("/dealer/leads", {
+        ...form,
+        selected_car_id: Number(form.selected_car_id),
+        budget: form.budget ? Number(form.budget) : null,
+      });
+      setResult(savedLead);
     } catch (requestError) {
       setError(requestError.message);
     } finally {
@@ -401,6 +400,7 @@ function SaveInterestForm({
       {result && (
         <div className="saved-lead-result">
           <span className="assistant-label">Interest saved · draft only</span>
+          <p className="save-interest-success">Dealer inquiry draft created successfully.</p>
           <h4>Lead #{result.lead_id} · Car #{result.selected_car_id}</h4>
           <p>
             <strong>Buyer:</strong> {result.customer_name || "Name not provided"} ·{" "}
@@ -1133,7 +1133,10 @@ function DealerSection() {
       <SectionHeader gear="S" title="Save" description="Save Interest / Dealer Draft" />
       <p className="section-copy">This saves a buyer interest draft. No email, WhatsApp, or dealer contact is sent automatically.</p>
       <div className="panel">
-        <SaveInterestForm allowCarId initiallyOpen />
+        <SaveInterestForm
+          allowCarId
+          initiallyOpen
+        />
       </div>
     </section>
   );
