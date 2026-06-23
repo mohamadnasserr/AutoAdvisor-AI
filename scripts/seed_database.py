@@ -3,6 +3,7 @@ import pandas as pd
 from backend.app.db.database import SessionLocal
 from backend.app.db.init_db import init_db
 from backend.app.models.db_models import Car, Dealership
+from backend.app.services.dealer_auth_service import seed_demo_dealer_users
 
 
 DEMO_DEALER_CONTACTS = {
@@ -189,6 +190,7 @@ def seed_database() -> None:
             db.add(car)
             inserted_cars += 1
 
+        inserted_dealer_users, updated_dealer_users = seed_demo_dealer_users(db)
         db.commit()
 
         total_cars = db.query(Car).count()
@@ -207,6 +209,8 @@ def seed_database() -> None:
         print(f"Total cars in database: {total_cars}")
         print(f"Cars with image_url: {cars_with_image_url}")
         print(f"Total dealerships in database: {total_dealers}")
+        print(f"Inserted dealer users: {inserted_dealer_users}")
+        print(f"Updated dealer users: {updated_dealer_users}")
 
     except Exception:
         db.rollback()

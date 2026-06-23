@@ -8,6 +8,7 @@ from backend.app.db.init_db import init_db
 from backend.app.models.schemas import HealthResponse
 from backend.app.api.comparison_routes import router as comparison_router
 from backend.app.api.dealer_routes import router as dealer_router
+from backend.app.api.dealer_auth_routes import router as dealer_auth_router
 from backend.app.api.image_routes import router as image_router
 
 
@@ -37,4 +38,5 @@ app.include_router(car_router)
 app.include_router(comparison_router)
 app.include_router(price_router)
 app.include_router(dealer_router)
+app.include_router(dealer_auth_router)
 app.include_router(image_router)

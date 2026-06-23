@@ -35,7 +35,7 @@ logs/
 uploads/
 data/raw/
 data/processed/
-models/
+/models/
 vectorstore/
 chroma_db/
 

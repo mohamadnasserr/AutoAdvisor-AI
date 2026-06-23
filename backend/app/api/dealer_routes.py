@@ -31,6 +31,7 @@ def get_leads(
     status: str | None = None,
     db: Session = Depends(get_db),
 ) -> list[DealerLeadListItem]:
+    """Internal demo/admin listing; authenticated dealers use /dealer/me/leads."""
     return list_dealer_leads(
         db=db,
         dealer_id=dealer_id,

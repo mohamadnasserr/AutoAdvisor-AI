@@ -221,6 +221,27 @@ input:focus, select:focus, textarea:focus { border-color: #51d5f6; box-shadow: 0
 .dealer-dashboard-hero h2 { margin: .6rem 0 1.2rem; color: #65ddff; font-size: clamp(1.25rem, 3vw, 2.2rem); }
 .dealer-dashboard-hero p { max-width: 850px; margin: .45rem 0; color: #9cb2bc; line-height: 1.65; }
 .dealer-dashboard-page-section { padding-top: 2rem; }
+.dealer-login-page { position: relative; overflow: hidden; }
+.dealer-login-main { position: relative; display: grid; min-height: calc(100vh - 75px); overflow: hidden; }
+.dealer-login-glow { position: absolute; top: 10%; right: 12%; width: 380px; height: 380px; border-radius: 50%; background: #0fb7e8; filter: blur(150px); opacity: .2; pointer-events: none; }
+.dealer-login-shell { position: relative; z-index: 1; display: grid; grid-template-columns: 1.1fr .9fr; align-items: center; gap: 3rem; width: 100%; max-width: 1120px; min-height: calc(100vh - 75px); padding-top: 4rem; padding-bottom: 4rem; border-top: 0; }
+.dealer-login-copy h1 { margin: .3rem 0; color: #f0fbff; font-size: clamp(3rem, 7vw, 6rem); letter-spacing: -.06em; }
+.dealer-login-copy h2 { margin: .75rem 0 1.25rem; color: #65ddff; font-size: clamp(1.3rem, 2.7vw, 2.2rem); }
+.dealer-login-copy p { color: #9cb2bc; line-height: 1.65; }
+.dealer-login-card { padding: 1.5rem; }
+.dealer-login-card h3 { margin: 0 0 1rem; font-size: 1.5rem; }
+.dealer-login-card form { display: grid; gap: .85rem; }
+.dealer-login-card form button { margin-top: .25rem; }
+.demo-account-hints { display: grid; gap: .5rem; margin-top: 1rem; padding: .85rem; border: 1px solid #254651; border-radius: .8rem; background: #061116; }
+.demo-account-hints strong { color: #bceefa; font-size: .76rem; }
+.demo-account-hints code { color: #8faab4; font-size: .72rem; overflow-wrap: anywhere; }
+.dealer-account-nav { display: flex; align-items: center; gap: .6rem; margin-left: auto; }
+.dealer-account-nav > span { color: #91aab4; font-size: .72rem; }
+.dealer-account-nav .secondary { padding: .55rem .75rem; }
+.dealer-account-nav .admin-nav-button { margin-left: 0; }
+.dealer-tenant-controls { grid-template-columns: minmax(240px, 1fr) auto; max-width: 620px; }
+.dealer-tenant-controls > button { min-height: 44px; }
+.dealer-session-loading { align-self: center; justify-self: center; color: #bceefa; }
 .dealer-dashboard { margin-top: 1rem; }
 .dealer-dashboard-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
 .dealer-dashboard-heading h3 { margin: .15rem 0; }
@@ -264,6 +285,10 @@ footer a:hover { color: #d9f8ff; }
   .hero { min-height: auto; padding-top: 5rem; }
   .hero h1 { font-size: 4rem; }
   .dealer-dashboard-hero { padding: 4.5rem 1rem 1rem; }
+  .dealer-login-shell { grid-template-columns: 1fr; gap: 1.5rem; padding: 4rem 1rem 2rem; }
+  .dealer-account-nav > span { display: none; }
+  .dealer-account-nav { gap: .35rem; }
+  .dealer-account-nav .secondary, .dealer-account-nav .admin-nav-button { padding: .45rem .55rem; font-size: .66rem; }
   section { padding: 4rem 1rem; }
   .gearbox-shell { width: 100%; max-width: 340px; }
   .gearbox-plate { border-radius: 1.6rem; padding: 1rem .85rem; }

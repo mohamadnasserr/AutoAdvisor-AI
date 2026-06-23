@@ -1,3 +1,6 @@
+import secrets
+
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -20,6 +23,11 @@ class Settings(BaseSettings):
     redis_url: str = "redis://localhost:6379/0"
     chat_memory_ttl_seconds: int = 1800
     chat_memory_max_messages: int = 30
+
+    dealer_jwt_secret: str = Field(
+        default_factory=lambda: secrets.token_urlsafe(32)
+    )
+    dealer_jwt_expire_minutes: int = 480
 
     model_config = SettingsConfigDict(
         env_file=".env",

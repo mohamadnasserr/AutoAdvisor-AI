@@ -45,6 +45,36 @@ export function getDealerships() {
   return apiGet("/dealer/dealerships");
 }
 
+export function dealerLogin(email, password) {
+  return apiPost("/dealer/auth/login", { email, password });
+}
+
+async function dealerAuthGet(path, token, params = {}) {
+  const url = new URL(`${API_BASE_URL}${path}`, window.location.origin);
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== "" && value !== null && value !== undefined) {
+      url.searchParams.set(key, value);
+    }
+  });
+  return parseResponse(
+    await fetch(url, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }),
+  );
+}
+
+export function getDealerProfile(token) {
+  return dealerAuthGet("/dealer/auth/me", token);
+}
+
+export function getMyDealerLeads(token, params = {}) {
+  return dealerAuthGet("/dealer/me/leads", token, params);
+}
+
 export async function apiPost(path, payload) {
   return parseResponse(
     await fetch(`${API_BASE_URL}${path}`, {
